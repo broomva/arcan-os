@@ -50,10 +50,16 @@ export abstract class RunService {
 
     // Assemble context
     const tools = kernel.toolKernel.getTools();
+    
+    // Get Memory Snapshot (contains observations/reflections)
+    // Note: We're using the EventStore to get the latest snapshot
+    const sessionSnapshot = kernel.eventStore.getLatestSnapshot({ sessionId: config.sessionId });
+
     const request = kernel.contextAssembler.assemble({
       runConfig: config,
       messages: [],
       tools,
+      sessionSnapshot: sessionSnapshot?.type === 'session' ? sessionSnapshot.data : undefined,
     });
 
     // Stream events from the engine
@@ -64,6 +70,20 @@ export abstract class RunService {
 
     // Complete the run
     kernel.runManager.completeRun(runId);
+
+    // Trigger Observational Memory processing
+    if (kernel.memoryService) {
+      // Fire-and-forget or await?
+      // It's background processing, so we can await it if we want it to finish before fully "returning",
+      // but typically memory is eventually consistent.
+      // However, for debugging/testing, awaiting is safer.
+      // Let's fire-and-forget but log errors.
+      kernel.memoryService
+        .processRun(config.sessionId, runId, kernel.runManager)
+        .catch((err) => {
+          console.error(`[Memory] Error processing run ${runId}:`, err);
+        });
+    }
   }
 
   /**

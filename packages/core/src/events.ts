@@ -39,7 +39,9 @@ export type AgentEventType =
   | 'engine.request'
   | 'engine.response'
   // Memory
-  | 'working_memory.snapshot';
+  | 'working_memory.snapshot'
+  | 'memory.observed'
+  | 'memory.reflected';
 
 // ---------------------------------------------------------------------------
 // Event envelope
@@ -172,6 +174,21 @@ export interface WorkingMemorySnapshotPayload {
 export interface StateSnapshotPayload {
   snapshotType: 'run' | 'session' | 'checkpoint';
   data: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Memory Payloads
+// ---------------------------------------------------------------------------
+
+import type { Observation, Reflection } from './snapshots.js';
+
+export interface MemoryObservedPayload {
+  observations: Observation[];
+  processedSeqRange: { start: number; end: number };
+}
+
+export interface MemoryReflectedPayload {
+  reflections: Reflection[];
 }
 
 // ---------------------------------------------------------------------------

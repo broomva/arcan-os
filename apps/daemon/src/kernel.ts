@@ -14,6 +14,7 @@ import { ToolKernel, repoRead, repoSearch, repoPatch, processRun } from '@agent-
 import { ContextAssembler } from '@agent-os/context';
 import { SkillRegistry } from '@agent-os/skills';
 import { AiSdkEngine } from '@agent-os/engine-adapter';
+import { MemoryService } from '@agent-os/memory';
 
 // ---------------------------------------------------------------------------
 // Model resolution — maps "provider/model" to an AI SDK LanguageModel
@@ -49,6 +50,7 @@ export interface Kernel {
   toolKernel: ToolKernel;
   contextAssembler: ContextAssembler;
   engine: AiSdkEngine | null;
+  memoryService: MemoryService | null;
   workspace: string;
   modelSpec: string;
 }
@@ -117,12 +119,26 @@ export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
     console.warn(`⚠️  Engine not available (model: ${modelSpec}). Runs will not invoke LLM.`);
   }
 
+  // Memory Service
+  let memoryService: MemoryService | null = null;
+  if (engine) {
+    // We reuse the engine's model for memory processing for now
+    // In production, you might want a cheaper/faster model for observation
+    const memoryModel = await resolveModel(modelSpec); // Create new instance or reuse logic
+    
+    memoryService = new MemoryService({
+      eventStore,
+      model: memoryModel,
+    });
+  }
+
   return {
     eventStore,
     runManager,
     toolKernel,
     contextAssembler,
     engine,
+    memoryService,
     workspace,
     modelSpec,
   };

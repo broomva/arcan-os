@@ -145,7 +145,7 @@ export class EventStore {
    */
   query(q: EventQuery): AgentEvent[] {
     const conditions: string[] = [];
-    const params: Record<string, unknown> = {};
+    const params: any = {};
 
     if (q.runId) {
       conditions.push('run_id = $runId');
@@ -209,7 +209,7 @@ export class EventStore {
   /**
    * Create a materialized snapshot.
    */
-  createSnapshot<T extends Record<string, unknown>>(
+  createSnapshot<T>(
     partial: Omit<Snapshot<T>, 'snapshotId' | 'createdAt'>,
   ): Snapshot<T> {
     const snapshot: Snapshot<T> = {
@@ -239,11 +239,11 @@ export class EventStore {
   /**
    * Get the latest snapshot for a session, optionally filtered by type.
    */
-  getLatestSnapshot<T extends Record<string, unknown>>(
+  getLatestSnapshot<T>(
     q: SnapshotQuery,
   ): Snapshot<T> | null {
     const conditions = ['session_id = $sessionId'];
-    const params: Record<string, unknown> = { $sessionId: q.sessionId };
+    const params: any = { $sessionId: q.sessionId };
 
     if (q.runId) {
       conditions.push('run_id = $runId');

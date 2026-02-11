@@ -21,6 +21,7 @@ import type {
   EngineRunRequest,
   ToolHandler,
   OutputDeltaPayload,
+  OutputMessagePayload,
   ToolCallPayload,
   ToolResultPayload,
   EngineRequestPayload,
@@ -85,6 +86,7 @@ export class AiSdkEngine implements AgentEngine {
 
     let seq = 0;
     let stepNumber = 0;
+    let currentMessageContent = '';
 
     const makeEvent = <T>(type: AgentEvent['type'], payload: T): AgentEvent<T> => ({
       eventId: generateId(),
@@ -140,37 +142,49 @@ export class AiSdkEngine implements AgentEngine {
 
     // Process fullStream — map each AI SDK part to a canonical AgentEvent
     for await (const part of result.fullStream) {
-      switch (part.type) {
+      const p = part as any;
+      switch (p.type) {
         case 'text-delta':
           yield makeEvent<OutputDeltaPayload>('output.delta', {
-            text: part.textDelta,
+            text: p.textDelta,
           });
+          // Accumulate text for the final message
+          currentMessageContent += p.textDelta;
           break;
 
         case 'tool-call':
           yield makeEvent<ToolCallPayload>('tool.call', {
-            callId: part.toolCallId,
-            toolId: part.toolName,
-            args: part.args as Record<string, unknown>,
+            callId: p.toolCallId,
+            toolId: p.toolName,
+            args: p.args as Record<string, unknown>,
           });
           break;
 
         case 'tool-result':
           yield makeEvent<ToolResultPayload>('tool.result', {
-            callId: part.toolCallId,
-            toolId: part.toolName,
-            result: part.result,
+            callId: p.toolCallId,
+            toolId: p.toolName,
+            result: p.result,
             durationMs: 0,
             approved: true,
           });
           break;
 
         case 'step-finish':
+          // Emit the full message if we have content
+          if (currentMessageContent.trim()) {
+            yield makeEvent<OutputMessagePayload>('output.message', {
+              role: 'assistant',
+              content: currentMessageContent,
+            });
+            currentMessageContent = ''; // Reset for next step
+          }
+
           stepNumber++;
           yield makeEvent<EngineResponsePayload>('engine.response', {
-            outputTokens: part.usage?.totalTokens ?? 0,
+            outputTokens: p.usage?.totalTokens ?? 0,
             latencyMs: 0,
-            finishReason: part.finishReason ?? 'unknown',
+            finishReason: p.finishReason ?? 'unknown',
             stepNumber,
           });
           break;

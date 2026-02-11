@@ -21,6 +21,7 @@
     "@agent-os/context": "workspace:*",
     "@agent-os/engine-adapter": "workspace:*",
     "@agent-os/event-store": "workspace:*",
+    "@agent-os/memory": "workspace:*",
     "@agent-os/observability": "workspace:*",
     "@agent-os/run-manager": "workspace:*",
     "@agent-os/skills": "workspace:*",

@@ -1,0 +1,20 @@
+{
+  "name": "@agent-os/memory",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@agent-os/core": "workspace:*",
+    "@agent-os/event-store": "workspace:*",
+    "@agent-os/run-manager": "workspace:*",
+    "ai": "^4.1.17",
+    "rxjs": "^7.8.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

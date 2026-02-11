@@ -39,6 +39,26 @@ export interface SessionSnapshotData {
   workingMemory: Record<string, unknown>;
   recentMessageSummary: string;
   activeSkills: string[];
+  // Observational Memory
+  observations: Observation[];
+  reflections: Reflection[];
+  lastObservedSeq: number;
+}
+
+export interface Observation {
+  id: string;
+  ts: number;
+  type: 'fact' | 'action' | 'outcome';
+  content: string;
+  sourceEventIds: string[];
+}
+
+export interface Reflection {
+  id: string;
+  topic: string;
+  content: string;
+  frequency: number;
+  ts: number;
 }
 
 export interface CheckpointSnapshotData {

@@ -27,6 +27,8 @@ export type {
   WorkingMemorySnapshotPayload,
   StateSnapshotPayload,
   RiskProfile,
+  MemoryObservedPayload,
+  MemoryReflectedPayload,
 } from './events.js';
 
 // Run — lifecycle state machine
