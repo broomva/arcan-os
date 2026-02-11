@@ -16,9 +16,12 @@
   },
   "dependencies": {
     "@agent-os/core": "workspace:*",
+    "@agent-os/context": "workspace:*",
     "@agent-os/engine-adapter": "workspace:*",
     "@agent-os/event-store": "workspace:*",
+    "@agent-os/observability": "workspace:*",
     "@agent-os/run-manager": "workspace:*",
+    "@agent-os/skills": "workspace:*",
     "@agent-os/tool-kernel": "workspace:*",
     "@sinclair/typebox": "^0.34.48",
     "elysia": "^1.3.0"

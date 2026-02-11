@@ -4,16 +4,21 @@
  * Wraps the Vercel AI SDK streamText to produce canonical AgentEvents.
  * Implements the AgentEngine interface from @agent-os/core.
  *
- * This is the anti-corruption layer between the AI SDK and Agent OS.
+ * This IS the ToolLoopAgent — AI SDK's `maxSteps` drives the multi-step
+ * tool loop. The engine:
+ *   1. Converts Agent OS tools → AI SDK CoreTools (delegating to ToolKernel)
+ *   2. Wires `needsApproval` to pause the loop for approval-required tools
+ *   3. Iterates `fullStream`, mapping each part to canonical AgentEvents
+ *   4. Enables `experimental_telemetry` for OTel/LangSmith observability
+ *
  * (V1 spec §12, unified_state_analysis §3)
  */
 
-import { streamText, type CoreTool, type StreamTextResult } from 'ai';
+import { streamText, type CoreTool } from 'ai';
 import type {
   AgentEngine,
   AgentEvent,
   EngineRunRequest,
-  EngineMessage,
   ToolHandler,
   OutputDeltaPayload,
   ToolCallPayload,
@@ -31,38 +36,42 @@ import type { ToolKernel } from '@agent-os/tool-kernel';
 export interface AiSdkEngineConfig {
   model: Parameters<typeof streamText>[0]['model'];
   toolKernel: ToolKernel;
-  /** Max steps for the ToolLoopAgent */
+  /** Max steps for the agent tool loop (default: 25) */
   maxSteps?: number;
+  /** Enable OTel telemetry (default: true) */
+  telemetryEnabled?: boolean;
+  /** Custom OTel tracer for telemetry */
+  tracer?: any;
 }
 
 // ---------------------------------------------------------------------------
-// AI SDK Engine
+// AI SDK Engine (ToolLoopAgent)
 // ---------------------------------------------------------------------------
 
-/**
- * Maps Agent OS tool handlers to AI SDK CoreTool format,
- * bridges fullStream events to canonical AgentEvents,
- * and delegates tool execution to the ToolKernel.
- */
 export class AiSdkEngine implements AgentEngine {
   private model: AiSdkEngineConfig['model'];
   private toolKernel: ToolKernel;
   private maxSteps: number;
+  private telemetryEnabled: boolean;
+  private tracer?: any;
 
   constructor(config: AiSdkEngineConfig) {
     this.model = config.model;
     this.toolKernel = config.toolKernel;
     this.maxSteps = config.maxSteps ?? 25;
+    this.telemetryEnabled = config.telemetryEnabled ?? true;
+    this.tracer = config.tracer;
   }
 
   /**
    * Execute a run. Produces canonical AgentEvents.
    *
-   * Strategy:
-   * 1. Convert Agent OS tools to AI SDK CoreTools
-   * 2. Call streamText with ToolLoopAgent (maxSteps)
-   * 3. Iterate fullStream, mapping each part to AgentEvents
-   * 4. Yield events one at a time
+   * The agent loop:
+   *   1. streamText sends prompt + tools to the LLM
+   *   2. LLM responds with text and/or tool calls
+   *   3. AI SDK auto-executes tools (unless needsApproval returns true)
+   *   4. Results are fed back → LLM loops (up to maxSteps)
+   *   5. Each fullStream part is mapped to a canonical AgentEvent
    */
   async *run(req: EngineRunRequest): AsyncIterable<AgentEvent> {
     const runId = req.runConfig.sessionId; // Will be set by caller
@@ -90,20 +99,46 @@ export class AiSdkEngine implements AgentEngine {
     // Emit engine.request
     yield makeEvent<EngineRequestPayload>('engine.request', {
       model: req.runConfig.model ?? 'unknown',
-      inputTokens: 0, // Updated in step-finish
+      inputTokens: 0,
       stepNumber: 0,
     });
 
-    // Stream via AI SDK
+    // Stream via AI SDK — this IS the ToolLoopAgent
     const result = streamText({
       model: this.model,
       system: req.systemPrompt,
       messages: messages as any,
       tools,
       maxSteps: this.maxSteps,
+
+      // ---------------------------------------------------------------
+      // needsApproval — pauses the tool loop for approval-required tools
+      // When this returns true, the SDK emits a tool-call but does NOT
+      // auto-execute it. The daemon handles the approval flow.
+      // ---------------------------------------------------------------
+      needsApproval: ({ toolName, args }) => {
+        return this.toolKernel.needsApproval(toolName, args as Record<string, unknown>);
+      },
+
+      // ---------------------------------------------------------------
+      // experimental_telemetry — OTel span emission for observability
+      // Consumed by any OTel exporter (Jaeger, Honeycomb, LangSmith)
+      // ---------------------------------------------------------------
+      experimental_telemetry: this.telemetryEnabled
+        ? {
+            isEnabled: true,
+            functionId: `agent-os/run/${sessionId}`,
+            metadata: {
+              runId,
+              sessionId,
+              model: req.runConfig.model ?? 'unknown',
+            },
+            ...(this.tracer ? { tracer: this.tracer } : {}),
+          }
+        : undefined,
     });
 
-    // Process fullStream
+    // Process fullStream — map each AI SDK part to a canonical AgentEvent
     for await (const part of result.fullStream) {
       switch (part.type) {
         case 'text-delta':
@@ -125,7 +160,7 @@ export class AiSdkEngine implements AgentEngine {
             callId: part.toolCallId,
             toolId: part.toolName,
             result: part.result,
-            durationMs: 0, // Not available from SDK
+            durationMs: 0,
             approved: true,
           });
           break;
@@ -141,7 +176,7 @@ export class AiSdkEngine implements AgentEngine {
           break;
 
         case 'error':
-          // Errors are handled by the caller
+          // Errors bubble up to the RunManager
           break;
 
         default:
@@ -185,7 +220,6 @@ export class AiSdkEngine implements AgentEngine {
   private buildMessages(req: EngineRunRequest): Array<{ role: string; content: string }> {
     const messages: Array<{ role: string; content: string }> = [];
 
-    // Add conversation history
     for (const msg of req.messages) {
       messages.push({
         role: msg.role,
@@ -193,7 +227,6 @@ export class AiSdkEngine implements AgentEngine {
       });
     }
 
-    // Add the current prompt as a user message
     messages.push({
       role: 'user',
       content: req.runConfig.prompt,
