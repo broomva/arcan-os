@@ -9,10 +9,10 @@
 import { Elysia } from 'elysia';
 import type { Kernel } from './kernel';
 
+import { approvals } from './modules/approvals';
 // Modules
 import { health } from './modules/health';
 import { runs } from './modules/runs';
-import { approvals } from './modules/approvals';
 import { sessions } from './modules/sessions';
 
 // ---------------------------------------------------------------------------

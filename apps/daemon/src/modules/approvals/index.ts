@@ -11,23 +11,22 @@ import { ApprovalModel } from './model';
 import { ApprovalService } from './service';
 
 export const approvals = (kernel: Kernel) =>
-  new Elysia({ prefix: '/v1/approvals' })
-
-    .post(
-      '/:approvalId',
-      ({ params, body }) => {
-        try {
-          return ApprovalService.resolve(
-            kernel.runManager.approvalGate,
-            params.approvalId,
-            { decision: body.decision, reason: body.reason },
-          );
-        } catch (error: any) {
-          return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 404, headers: { 'Content-Type': 'application/json' } },
-          );
-        }
-      },
-      { body: ApprovalModel.resolveBody },
-    );
+  new Elysia({ prefix: '/v1/approvals' }).post(
+    '/:approvalId',
+    ({ params, body }) => {
+      try {
+        return ApprovalService.resolve(
+          kernel.runManager.approvalGate,
+          params.approvalId,
+          { decision: body.decision, reason: body.reason },
+        );
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        return new Response(JSON.stringify({ error: message }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    },
+    { body: ApprovalModel.resolveBody },
+  );

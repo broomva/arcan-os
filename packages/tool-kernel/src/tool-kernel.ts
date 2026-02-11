@@ -6,12 +6,12 @@
  * (V1 spec §5)
  */
 
-import { resolve, relative, join } from 'path';
+import { join, relative, resolve } from 'node:path';
 import type {
-  ToolHandler,
-  ToolContext,
-  RiskProfile,
   ControlPath,
+  RiskProfile,
+  ToolContext,
+  ToolHandler,
 } from '@agent-os/core';
 import { PolicyEngine } from './policy-engine.js';
 
@@ -128,7 +128,9 @@ export class ToolKernel {
     const denyPatterns = this.policy.getDenyPatterns();
     for (const pattern of denyPatterns) {
       if (this.matchesPattern(rel, pattern)) {
-        throw new Error(`Path matches deny pattern "${pattern}": ${targetPath}`);
+        throw new Error(
+          `Path matches deny pattern "${pattern}": ${targetPath}`,
+        );
       }
     }
 
@@ -217,7 +219,13 @@ export class ToolKernel {
   }
 
   private checkBuild(path: string): boolean {
-    const buildPatterns = ['webpack', 'vite', 'turbo', 'next.config', 'Makefile'];
+    const buildPatterns = [
+      'webpack',
+      'vite',
+      'turbo',
+      'next.config',
+      'Makefile',
+    ];
     return buildPatterns.some((p) => path.includes(p));
   }
 
@@ -246,7 +254,7 @@ export class ToolKernel {
     if (typeof result === 'string') {
       const maxStdout = this.policy.getLimits().maxStdout;
       if (result.length > maxStdout) {
-        return result.slice(0, maxStdout) + `\n... [truncated at ${maxStdout} chars]`;
+        return `${result.slice(0, maxStdout)}\n... [truncated at ${maxStdout} chars]`;
       }
     }
     return result;

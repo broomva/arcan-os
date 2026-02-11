@@ -10,12 +10,13 @@ import type { Kernel } from '../../kernel';
 import { SessionService } from './service';
 
 export const sessions = (kernel: Kernel) =>
-  new Elysia({ prefix: '/v1/sessions' })
-
-    .get('/:sessionId/state', ({ params }) => {
+  new Elysia({ prefix: '/v1/sessions' }).get(
+    '/:sessionId/state',
+    ({ params }) => {
       return SessionService.getState(
         kernel.eventStore,
         kernel.runManager,
         params.sessionId,
       );
-    });
+    },
+  );

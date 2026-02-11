@@ -59,6 +59,8 @@ export type {
   RunSnapshotData,
   SessionSnapshotData,
   CheckpointSnapshotData,
+  Observation,
+  Reflection,
 } from './snapshots.js';
 
 // Utilities

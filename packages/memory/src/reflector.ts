@@ -1,8 +1,8 @@
-import { generateText, tool } from 'ai';
-import { z } from 'zod';
-import type { LanguageModel } from 'ai';
 import { generateId, now } from '@agent-os/core';
 import type { Observation, Reflection } from '@agent-os/core';
+import { generateText, tool } from 'ai';
+import type { LanguageModel } from 'ai';
+import { z } from 'zod';
 
 export class Reflector {
   constructor(private model: LanguageModel) {}
@@ -32,9 +32,15 @@ ${observationText}`,
           parameters: z.object({
             reflections: z.array(
               z.object({
-                topic: z.string().describe('The subject of the reflection (e.g., "User Preference", "Project Architecture")'),
+                topic: z
+                  .string()
+                  .describe(
+                    'The subject of the reflection (e.g., "User Preference", "Project Architecture")',
+                  ),
                 content: z.string().describe('The synthesized insight'),
-                frequency: z.number().describe('How often this pattern was observed (1-10 scale)'),
+                frequency: z
+                  .number()
+                  .describe('How often this pattern was observed (1-10 scale)'),
               }),
             ),
           }),
@@ -49,12 +55,14 @@ ${observationText}`,
     const refCall = toolCalls.find((tc) => tc.toolName === 'recordReflections');
     if (!refCall) return [];
 
-    const args = refCall.args as { reflections: Array<{ topic: string; content: string; frequency: number }> };
-    
+    const args = refCall.args as {
+      reflections: Array<{ topic: string; content: string; frequency: number }>;
+    };
+
     const timestamp = now();
-    
+
     return args.reflections.map((r) => ({
-      id: generateId('ref'),
+      id: generateId(),
       ts: timestamp,
       topic: r.topic,
       content: r.content,

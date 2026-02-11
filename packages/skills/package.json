@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "@agent-os/tsconfig": "workspace:*"
   },
   "dependencies": {
     "@agent-os/core": "workspace:*",

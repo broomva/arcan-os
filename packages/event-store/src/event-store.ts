@@ -9,11 +9,7 @@
  */
 
 import { Database } from 'bun:sqlite';
-import type {
-  AgentEvent,
-  AgentEventType,
-  Snapshot,
-} from '@agent-os/core';
+import type { AgentEvent, AgentEventType, Snapshot } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 
 // ---------------------------------------------------------------------------
@@ -45,7 +41,7 @@ export class EventStore {
   private appendStmt!: ReturnType<Database['prepare']>;
   private seqCounter: Map<string, number> = new Map();
 
-  constructor(dbPath: string = ':memory:') {
+  constructor(dbPath = ':memory:') {
     this.db = new Database(dbPath, { create: true });
     this.db.exec('PRAGMA journal_mode = WAL');
     this.db.exec('PRAGMA synchronous = NORMAL');
@@ -145,7 +141,7 @@ export class EventStore {
    */
   query(q: EventQuery): AgentEvent[] {
     const conditions: string[] = [];
-    const params: any = {};
+    const params: Record<string, string | number | null> = {};
 
     if (q.runId) {
       conditions.push('run_id = $runId');
@@ -171,13 +167,15 @@ export class EventStore {
       params.$beforeSeq = q.beforeSeq;
     }
 
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const where =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const order = q.order === 'desc' ? 'DESC' : 'ASC';
-    const limit = q.limit ? `LIMIT $limit` : '';
+    const limit = q.limit ? 'LIMIT $limit' : '';
     if (q.limit) params.$limit = q.limit;
 
     const sql = `SELECT * FROM events ${where} ORDER BY seq ${order} ${limit}`;
-    const rows = this.db.prepare(sql).all(params) as EventRow[];
+    // biome-ignore lint/suspicious/noExplicitAny: bun:sqlite bindings are flexible
+    const rows = this.db.prepare(sql).all(params as any) as EventRow[];
 
     return rows.map(rowToEvent);
   }
@@ -239,11 +237,11 @@ export class EventStore {
   /**
    * Get the latest snapshot for a session, optionally filtered by type.
    */
-  getLatestSnapshot<T>(
-    q: SnapshotQuery,
-  ): Snapshot<T> | null {
+  getLatestSnapshot<T>(q: SnapshotQuery): Snapshot<T> | null {
     const conditions = ['session_id = $sessionId'];
-    const params: any = { $sessionId: q.sessionId };
+    const params: Record<string, string | number | null> = {
+      $sessionId: q.sessionId,
+    };
 
     if (q.runId) {
       conditions.push('run_id = $runId');
@@ -255,7 +253,8 @@ export class EventStore {
     }
 
     const sql = `SELECT * FROM snapshots WHERE ${conditions.join(' AND ')} ORDER BY seq DESC LIMIT 1`;
-    const row = this.db.prepare(sql).get(params) as SnapshotRow | null;
+    // biome-ignore lint/suspicious/noExplicitAny: bun:sqlite bindings are flexible
+    const row = this.db.prepare(sql).get(params as any) as SnapshotRow | null;
 
     if (!row) return null;
 

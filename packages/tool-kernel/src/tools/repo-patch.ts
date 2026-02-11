@@ -3,15 +3,19 @@
  * (V1 spec §37: repo.patch(path, unifiedDiff))
  */
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import type { ToolContext, ToolHandler } from '@agent-os/core';
 import { z } from 'zod';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { resolve, dirname } from 'path';
-import type { ToolHandler, ToolContext } from '@agent-os/core';
 
 export const inputSchema = z.object({
   path: z.string().describe('Relative path to the file to patch'),
   content: z.string().describe('The full new file content to write'),
-  createIfMissing: z.boolean().optional().default(true).describe('Create the file if it does not exist'),
+  createIfMissing: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe('Create the file if it does not exist'),
 });
 
 type Input = z.infer<typeof inputSchema>;
@@ -26,7 +30,8 @@ export const repoPatch: ToolHandler<Input, Output> = {
   id: 'repo.patch',
   description:
     'Write or overwrite a file with the provided content. Creates parent directories if needed. Path is relative to workspace root.',
-  inputSchema,
+  // biome-ignore lint/suspicious/noExplicitAny: Zod schema type mismatch with ToolHandler
+  inputSchema: inputSchema as any,
   category: 'write',
 
   async execute(input: Input, ctx: ToolContext): Promise<Output> {

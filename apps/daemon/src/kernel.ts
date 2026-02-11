@@ -8,13 +8,20 @@
  * via Elysia's `decorate` and destructure only what they need.
  */
 
-import { EventStore } from '@agent-os/event-store';
-import { RunManager } from '@agent-os/run-manager';
-import { ToolKernel, repoRead, repoSearch, repoPatch, processRun } from '@agent-os/tool-kernel';
 import { ContextAssembler } from '@agent-os/context';
-import { SkillRegistry } from '@agent-os/skills';
 import { AiSdkEngine } from '@agent-os/engine-adapter';
+import { EventStore } from '@agent-os/event-store';
 import { MemoryService } from '@agent-os/memory';
+import { RunManager } from '@agent-os/run-manager';
+import { SkillRegistry } from '@agent-os/skills';
+import {
+  ToolKernel,
+  processRun,
+  repoPatch,
+  repoRead,
+  repoSearch,
+} from '@agent-os/tool-kernel';
+import { env } from './env';
 
 // ---------------------------------------------------------------------------
 // Model resolution — maps "provider/model" to an AI SDK LanguageModel
@@ -67,12 +74,13 @@ export interface KernelOptions {
 }
 
 const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-20250514';
-const DEFAULT_PROMPT = 'You are Agent OS, a helpful coding assistant with access to file system tools.';
+const DEFAULT_PROMPT =
+  'You are Agent OS, a helpful coding assistant with access to file system tools.';
 
 export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
-  const workspace = opts.workspace ?? process.cwd();
-  const modelSpec = opts.model ?? process.env.AGENT_OS_MODEL ?? DEFAULT_MODEL;
-  const dbPath = opts.dbPath ?? process.env.AGENT_OS_DB ?? ':memory:';
+  const workspace = opts.workspace ?? env.AGENT_OS_WORKSPACE;
+  const modelSpec = opts.model ?? env.AGENT_OS_MODEL ?? DEFAULT_MODEL;
+  const dbPath = opts.dbPath ?? env.AGENT_OS_DB;
   const basePrompt = opts.basePrompt ?? DEFAULT_PROMPT;
 
   // Core services
@@ -116,7 +124,9 @@ export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
     });
   } catch {
     // Engine creation can fail if no API key is set — that's OK for testing
-    console.warn(`⚠️  Engine not available (model: ${modelSpec}). Runs will not invoke LLM.`);
+    console.warn(
+      `⚠️  Engine not available (model: ${modelSpec}). Runs will not invoke LLM.`,
+    );
   }
 
   // Memory Service
@@ -125,7 +135,7 @@ export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
     // We reuse the engine's model for memory processing for now
     // In production, you might want a cheaper/faster model for observation
     const memoryModel = await resolveModel(modelSpec); // Create new instance or reuse logic
-    
+
     memoryService = new MemoryService({
       eventStore,
       model: memoryModel,

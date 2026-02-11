@@ -29,11 +29,13 @@ export const runs = (kernel: Kernel) =>
             skills: body.skills,
             maxSteps: body.maxSteps,
           });
-        } catch (error: any) {
-          return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 409, headers: { 'Content-Type': 'application/json' } },
-          );
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          return new Response(JSON.stringify({ error: message }), {
+            status: 409,
+            headers: { 'Content-Type': 'application/json' },
+          });
         }
       },
       { body: RunModel.createBody },
@@ -54,7 +56,7 @@ export const runs = (kernel: Kernel) =>
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
           'X-Accel-Buffering': 'no',
         },
       });

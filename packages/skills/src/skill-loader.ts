@@ -10,8 +10,8 @@
  *   3. Global: ~/.agent-os/skills/SKILL.md
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { join, basename, resolve } from 'path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { basename, join, resolve } from 'node:path';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -111,9 +111,10 @@ export function parseSkillFile(
     // Extract references (lines like `- ./references/foo.md -- description`)
     const references: string[] = [];
     const refPattern = /^\s*-\s+(\.\/[^\s]+)/gm;
-    let match: RegExpExecArray | null;
-    while ((match = refPattern.exec(content)) !== null) {
+    let match = refPattern.exec(content);
+    while (match !== null) {
       references.push(match[1]);
+      match = refPattern.exec(content);
     }
 
     return {
@@ -170,7 +171,10 @@ export function parseFrontmatter(raw: string): {
     }
   }
 
-  const content = lines.slice(endIndex + 1).join('\n').trim();
+  const content = lines
+    .slice(endIndex + 1)
+    .join('\n')
+    .trim();
 
   return { frontmatter, content };
 }

@@ -1,0 +1,40 @@
+# Cursor Rules for Agent OS
+
+## Project Overview
+
+Agent OS is a modular, event-sourced agent runtime built with:
+- **Runtime**: Bun
+- **Language**: TypeScript (Strict Mode)
+- **Monorepo**: Turborepo
+- **AI Engine**: Vercel AI SDK
+- **Database**: SQLite (local)
+- **Server**: Elysia
+
+## Coding Standards
+
+### TypeScript
+- **Strict Mode**: Always enabled. No `any`.
+- **Functional Style**: Prefer functional programming over classes, except for singletons/services where classes use dependency injection.
+- **Interfaces**: Use `interface` for object shapes, `type` for unions/primitives.
+- **Zod**: Use Zod for runtime validation and schema definitions.
+- **Async/Await**: Always use async/await over raw promises.
+
+### Testing
+- **Runner**: `bun test`.
+- **Libraries**: Native `bun:test` (`describe`, `it`, `expect`).
+- **Mocking**: Use `mock()` from `bun:test`.
+
+### Monorepo Structure
+- **apps/**: Deployable applications (`daemon`).
+- **packages/**: Shared logic (`core`, `event-store`, `tool-kernel`).
+- **Tools**: Dependencies can be `workspace:*`.
+
+## Commands
+- **New Dependency**: `bun add -d <pkg>` (root) or `cd packages/<pkg> && bun add <dep>`.
+- **Run Tests**: `bun test`.
+- **Lint/Format**: `bun run check`.
+
+## Context Limitations
+- Assume the user has `bun` installed.
+- Do not assume `node` or `npm` are the primary tools.
+- When creating new files, always verify package exports in `package.json`.

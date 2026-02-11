@@ -2,16 +2,16 @@
  * @agent-os/skills — Tests
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { join } from 'path';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { injectSkills, summarizeSkills } from '../src/skill-injector.js';
 import {
   loadSkills,
-  parseSkillFile,
   parseFrontmatter,
+  parseSkillFile,
 } from '../src/skill-loader.js';
 import { SkillRegistry } from '../src/skill-registry.js';
-import { injectSkills, summarizeSkills } from '../src/skill-injector.js';
 
 const TEST_DIR = join(import.meta.dir, '__test_workspace__');
 
@@ -24,7 +24,10 @@ function createSkill(dir: string, name: string, content: string) {
 function setup() {
   // Workspace skills
   const wsSkills = join(TEST_DIR, '.agent', 'skills');
-  createSkill(wsSkills, 'building-ui', `---
+  createSkill(
+    wsSkills,
+    'building-ui',
+    `---
 name: building-ui
 description: Guide for building UI components
 version: 1.0.0
@@ -35,38 +38,51 @@ Use components for everything.
 
 - ./references/buttons.md -- Button patterns
 - ./references/forms.md -- Form patterns
-`);
+`,
+  );
 
-  createSkill(wsSkills, 'data-fetching', `---
+  createSkill(
+    wsSkills,
+    'data-fetching',
+    `---
 name: data-fetching
 description: Data fetching patterns
 ---
 # Data Fetching
 
 Use SWR or React Query.
-`);
+`,
+  );
 
   // Installed skills (.skills/)
   const installed = join(TEST_DIR, '.skills');
-  createSkill(installed, 'deployment', `---
+  createSkill(
+    installed,
+    'deployment',
+    `---
 name: deployment
 description: Deploy apps to production
 ---
 # Deployment Guide
 
 Deploy with Vercel.
-`);
+`,
+  );
 
   // Global skills
   const globalDir = join(TEST_DIR, '__global__', '.agent-os', 'skills');
-  createSkill(globalDir, 'testing', `---
+  createSkill(
+    globalDir,
+    'testing',
+    `---
 name: testing
 description: Testing best practices
 ---
 # Testing
 
 Write tests for everything.
-`);
+`,
+  );
 }
 
 function teardown() {
@@ -163,7 +179,9 @@ describe('loadSkills', () => {
       homeDir: join(TEST_DIR, '__global__'),
     });
 
-    const ui = skills.find((s) => s.name === 'building-ui')!;
+    const ui = skills.find((s) => s.name === 'building-ui');
+    if (!ui) throw new Error('building-ui skill not found');
+
     expect(ui.references).toContain('./references/buttons.md');
     expect(ui.references).toContain('./references/forms.md');
   });
@@ -201,7 +219,7 @@ describe('SkillRegistry', () => {
   it('gets a skill by name', () => {
     const skill = registry.get('building-ui');
     expect(skill).toBeDefined();
-    expect(skill!.description).toBe('Guide for building UI components');
+    expect(skill?.description).toBe('Guide for building UI components');
   });
 
   it('filters by name list', () => {

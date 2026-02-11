@@ -2,20 +2,23 @@
  * @agent-os/tool-kernel — Tests
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { join } from 'path';
-import { ToolKernel } from '../src/tool-kernel.js';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { PolicyEngine } from '../src/policy-engine.js';
-import { repoRead } from '../src/tools/repo-read.js';
-import { repoPatch } from '../src/tools/repo-patch.js';
+import { ToolKernel } from '../src/tool-kernel.js';
 import { processRun } from '../src/tools/process-run.js';
+import { repoPatch } from '../src/tools/repo-patch.js';
+import { repoRead } from '../src/tools/repo-read.js';
 
 const TEST_DIR = join(import.meta.dir, '__test_workspace__');
 
 function setup() {
   mkdirSync(join(TEST_DIR, 'src'), { recursive: true });
-  writeFileSync(join(TEST_DIR, 'src', 'hello.ts'), 'const x = 1;\nconst y = 2;\nconst z = 3;\n');
+  writeFileSync(
+    join(TEST_DIR, 'src', 'hello.ts'),
+    'const x = 1;\nconst y = 2;\nconst z = 3;\n',
+  );
   writeFileSync(join(TEST_DIR, 'README.md'), '# Test Project\n');
 }
 
@@ -41,19 +44,40 @@ describe('PolicyEngine', () => {
 
   it('returns correct control path for read tools', () => {
     const engine = new PolicyEngine();
-    const risk = { toolId: 'repo.read', category: 'read' as const, estimatedImpact: 'small' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
+    const risk = {
+      toolId: 'repo.read',
+      category: 'read' as const,
+      estimatedImpact: 'small' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
     expect(engine.getControlPath('repo.read', risk)).toBe('auto');
   });
 
   it('returns approval for always-approve tools', () => {
     const engine = new PolicyEngine();
-    const risk = { toolId: 'repo.patch', category: 'write' as const, estimatedImpact: 'medium' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
+    const risk = {
+      toolId: 'repo.patch',
+      category: 'write' as const,
+      estimatedImpact: 'medium' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
     expect(engine.getControlPath('repo.patch', risk)).toBe('approval');
   });
 
   it('escalates risk-based tools on high impact', () => {
     const engine = new PolicyEngine();
-    const risk = { toolId: 'process.run', category: 'exec' as const, estimatedImpact: 'large' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
+    const risk = {
+      toolId: 'process.run',
+      category: 'exec' as const,
+      estimatedImpact: 'large' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
     expect(engine.getControlPath('process.run', risk)).toBe('approval');
   });
 });
@@ -103,7 +127,9 @@ describe('ToolKernel', () => {
     });
 
     it('rejects paths that escape the workspace', () => {
-      expect(() => kernel.validatePath('../../etc/passwd')).toThrow('escapes workspace');
+      expect(() => kernel.validatePath('../../etc/passwd')).toThrow(
+        'escapes workspace',
+      );
     });
 
     it('rejects paths matching deny patterns', () => {
@@ -144,11 +170,15 @@ describe('ToolKernel', () => {
 
   describe('needsApproval', () => {
     it('returns false for read tools', () => {
-      expect(kernel.needsApproval('repo.read', { path: 'test.ts' })).toBe(false);
+      expect(kernel.needsApproval('repo.read', { path: 'test.ts' })).toBe(
+        false,
+      );
     });
 
     it('returns true for write tools', () => {
-      expect(kernel.needsApproval('repo.patch', { path: 'test.ts' })).toBe(true);
+      expect(kernel.needsApproval('repo.patch', { path: 'test.ts' })).toBe(
+        true,
+      );
     });
   });
 
@@ -158,33 +188,45 @@ describe('ToolKernel', () => {
 
   describe('execute', () => {
     it('executes repo.read successfully', async () => {
-      const result = await kernel.execute('repo.read', { path: 'src/hello.ts' }, 'r1', 's1') as any;
+      const result = (await kernel.execute(
+        'repo.read',
+        { path: 'src/hello.ts' },
+        'r1',
+        's1',
+      )) as { content: string; totalLines: number };
       expect(result.content).toContain('const x = 1');
       expect(result.totalLines).toBe(4); // 3 lines + trailing newline
     });
 
     it('executes repo.read with line range', async () => {
-      const result = await kernel.execute('repo.read', { path: 'src/hello.ts', startLine: 2, endLine: 2 }, 'r1', 's1') as any;
+      const result = (await kernel.execute(
+        'repo.read',
+        { path: 'src/hello.ts', startLine: 2, endLine: 2 },
+        'r1',
+        's1',
+      )) as { content: string; range: object };
       expect(result.content).toBe('const y = 2;');
       expect(result.range).toEqual({ start: 2, end: 2 });
     });
 
     it('executes repo.patch to create a new file', async () => {
-      const result = await kernel.execute(
+      const result = (await kernel.execute(
         'repo.patch',
         { path: 'src/new-file.ts', content: 'export const hello = "world";\n' },
-        'r1', 's1',
-      ) as any;
+        'r1',
+        's1',
+      )) as { created: boolean; linesChanged: number };
       expect(result.created).toBe(true);
       expect(result.linesChanged).toBeGreaterThan(0);
     });
 
     it('executes process.run', async () => {
-      const result = await kernel.execute(
+      const result = (await kernel.execute(
         'process.run',
         { command: 'echo hello' },
-        'r1', 's1',
-      ) as any;
+        'r1',
+        's1',
+      )) as { exitCode: number; stdout: string };
       expect(result.exitCode).toBe(0);
       expect(result.stdout.trim()).toBe('hello');
     });

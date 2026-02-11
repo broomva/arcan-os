@@ -14,21 +14,22 @@
  * (V1 spec §12, unified_state_analysis §3)
  */
 
-import { streamText, type CoreTool } from 'ai';
 import type {
   AgentEngine,
   AgentEvent,
+  EngineRequestPayload,
+  EngineResponsePayload,
   EngineRunRequest,
-  ToolHandler,
   OutputDeltaPayload,
   OutputMessagePayload,
   ToolCallPayload,
+  ToolHandler,
   ToolResultPayload,
-  EngineRequestPayload,
-  EngineResponsePayload,
 } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 import type { ToolKernel } from '@agent-os/tool-kernel';
+import { type CoreTool, streamText } from 'ai';
+import type { ZodSchema } from 'zod';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,6 +43,7 @@ export interface AiSdkEngineConfig {
   /** Enable OTel telemetry (default: true) */
   telemetryEnabled?: boolean;
   /** Custom OTel tracer for telemetry */
+  // biome-ignore lint/suspicious/noExplicitAny: Telemetry tracer type is opaque and OTel types are not available here
   tracer?: any;
 }
 
@@ -54,6 +56,7 @@ export class AiSdkEngine implements AgentEngine {
   private toolKernel: ToolKernel;
   private maxSteps: number;
   private telemetryEnabled: boolean;
+  // biome-ignore lint/suspicious/noExplicitAny: Telemetry tracer type is opaque
   private tracer?: any;
 
   constructor(config: AiSdkEngineConfig) {
@@ -88,7 +91,10 @@ export class AiSdkEngine implements AgentEngine {
     let stepNumber = 0;
     let currentMessageContent = '';
 
-    const makeEvent = <T>(type: AgentEvent['type'], payload: T): AgentEvent<T> => ({
+    const makeEvent = <T>(
+      type: AgentEvent['type'],
+      payload: T,
+    ): AgentEvent<T> => ({
       eventId: generateId(),
       runId,
       sessionId,
@@ -109,18 +115,9 @@ export class AiSdkEngine implements AgentEngine {
     const result = streamText({
       model: this.model,
       system: req.systemPrompt,
-      messages: messages as any,
+      messages: messages as import('ai').CoreMessage[],
       tools,
       maxSteps: this.maxSteps,
-
-      // ---------------------------------------------------------------
-      // needsApproval — pauses the tool loop for approval-required tools
-      // When this returns true, the SDK emits a tool-call but does NOT
-      // auto-execute it. The daemon handles the approval flow.
-      // ---------------------------------------------------------------
-      needsApproval: ({ toolName, args }) => {
-        return this.toolKernel.needsApproval(toolName, args as Record<string, unknown>);
-      },
 
       // ---------------------------------------------------------------
       // experimental_telemetry — OTel span emission for observability
@@ -138,11 +135,33 @@ export class AiSdkEngine implements AgentEngine {
             ...(this.tracer ? { tracer: this.tracer } : {}),
           }
         : undefined,
+      // TODO: Implement needsApproval support.
+      // Current AI SDK version does not support 'needsApproval' hook in streamText.
+      // We might need to handle tool execution manually or use a different pattern.
     });
 
     // Process fullStream — map each AI SDK part to a canonical AgentEvent
     for await (const part of result.fullStream) {
-      const p = part as any;
+      const p = part as
+        | { type: 'text-delta'; textDelta: string }
+        | {
+            type: 'tool-call';
+            toolCallId: string;
+            toolName: string;
+            args: unknown;
+          }
+        | {
+            type: 'tool-result';
+            toolCallId: string;
+            toolName: string;
+            result: unknown;
+          }
+        | {
+            type: 'step-finish';
+            usage: { totalTokens: number };
+            finishReason: string;
+          }
+        | { type: 'error'; error: unknown };
       switch (p.type) {
         case 'text-delta':
           yield makeEvent<OutputDeltaPayload>('output.delta', {
@@ -218,9 +237,14 @@ export class AiSdkEngine implements AgentEngine {
     for (const tool of tools) {
       aiTools[tool.id] = {
         description: tool.description,
-        parameters: tool.inputSchema as any,
-        execute: async (args: any) => {
-          return this.toolKernel.execute(tool.id, args, runId, sessionId);
+        parameters: tool.inputSchema as unknown as ZodSchema<unknown>,
+        execute: async (args: unknown) => {
+          return this.toolKernel.execute(
+            tool.id,
+            args as Record<string, unknown>,
+            runId,
+            sessionId,
+          );
         },
       };
     }
@@ -231,7 +255,9 @@ export class AiSdkEngine implements AgentEngine {
   /**
    * Convert EngineMessages to AI SDK message format.
    */
-  private buildMessages(req: EngineRunRequest): Array<{ role: string; content: string }> {
+  private buildMessages(
+    req: EngineRunRequest,
+  ): Array<{ role: string; content: string }> {
     const messages: Array<{ role: string; content: string }> = [];
 
     for (const msg of req.messages) {

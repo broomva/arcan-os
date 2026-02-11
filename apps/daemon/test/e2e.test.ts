@@ -7,34 +7,48 @@
  * Uses Elysia's app.handle() for HTTP tests (same pattern as daemon.test.ts).
  */
 
-import { describe, expect, it, beforeAll, afterAll, beforeEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { join } from 'path';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'bun:test';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
+import { createApp } from '../src/app';
 // Daemon — import from the same package's src
 import { createKernel } from '../src/kernel';
-import { createApp } from '../src/app';
 
+import { ContextAssembler, projectMessages } from '@agent-os/context';
 // Skills + Context
 import { SkillRegistry } from '@agent-os/skills';
-import { ContextAssembler, projectMessages } from '@agent-os/context';
 
 // Observability
 import { EventTracer } from '@agent-os/observability';
 // Note: We need to mock telemetry for tests or rely on what's available
 // Since setupTelemetry is exported by @agent-os/observability, we can use it.
-import { setupTelemetry, shutdownTelemetry, getInMemoryExporter } from '@agent-os/observability';
+import {
+  getInMemoryExporter,
+  setupTelemetry,
+  shutdownTelemetry,
+} from '@agent-os/observability';
 
 // Core types
 import type { AgentEvent } from '@agent-os/core';
-import type { Kernel } from '../src/kernel';
 import { now } from '@agent-os/core';
+import type { Kernel } from '../src/kernel';
 
 const TEST_WORKSPACE = join(import.meta.dir, '__e2e_workspace__');
 
 function setupWorkspace() {
   mkdirSync(join(TEST_WORKSPACE, 'src'), { recursive: true });
-  writeFileSync(join(TEST_WORKSPACE, 'src', 'hello.ts'), 'export const hello = "world";\n');
+  writeFileSync(
+    join(TEST_WORKSPACE, 'src', 'hello.ts'),
+    'export const hello = "world";\n',
+  );
 
   // Create a workspace skill
   const skillDir = join(TEST_WORKSPACE, '.agent', 'skills', 'typescript-guide');
@@ -92,7 +106,8 @@ describe('E2E: Full Run Lifecycle', () => {
       }),
     );
     expect(createRes.status).toBe(200);
-    const createData = await createRes.json() as any;
+    // biome-ignore lint/suspicious/noExplicitAny: Test helper
+    const createData = (await createRes.json()) as any;
     const runId = createData.runId;
     expect(runId).toBeDefined();
     expect(createData.state).toBe('running');
@@ -134,7 +149,8 @@ describe('E2E: Full Run Lifecycle', () => {
     const stateRes = await app.handle(
       new Request(`http://localhost/v1/sessions/${sessionId}/state`),
     );
-    const stateData = await stateRes.json() as any;
+    // biome-ignore lint/suspicious/noExplicitAny: Test helper
+    const stateData = (await stateRes.json()) as any;
     expect(stateData.sessionId).toBe(sessionId);
     expect(stateData.pendingEvents.length).toBeGreaterThanOrEqual(5);
   });
@@ -150,7 +166,8 @@ describe('E2E: Full Run Lifecycle', () => {
         body: JSON.stringify({ sessionId, prompt: 'Test replay' }),
       }),
     );
-    const { runId } = await createRes.json() as any;
+    // biome-ignore lint/suspicious/noExplicitAny: Test helper
+    const { runId } = (await createRes.json()) as any;
 
     // Emit events
     kernel.runManager.emit(runId, 'output.delta', { text: 'First ' });
@@ -173,7 +190,9 @@ describe('E2E: Full Run Lifecycle', () => {
     const replayText = await replayRes.text();
 
     // Should NOT contain First but SHOULD contain Second, Third, completed
-    const lines = replayText.split('\n').filter((l: string) => l.startsWith('data: '));
+    const lines = replayText
+      .split('\n')
+      .filter((l: string) => l.startsWith('data: '));
     // It depends on how many lines each event takes.
     // The events are:
     // 1. Second (delta)
@@ -219,20 +238,21 @@ describe('E2E: Approval Flow', () => {
     );
 
     // 2. Request an approval
-    const { approvalId, promise: approvalPromise } = kernel.runManager.approvalGate.requestApproval({
-      callId: `call-${Date.now()}`,
-      toolId: 'repo.patch',
-      args: { path: 'src/test.ts', content: 'export const x = 1;' },
-      preview: {},
-      risk: {
+    const { approvalId, promise: approvalPromise } =
+      kernel.runManager.approvalGate.requestApproval({
+        callId: `call-${Date.now()}`,
         toolId: 'repo.patch',
-        category: 'write',
-        estimatedImpact: 'medium',
-        touchesSecrets: false,
-        touchesConfig: false,
-        touchesBuild: false,
-      },
-    });
+        args: { path: 'src/test.ts', content: 'export const x = 1;' },
+        preview: {},
+        risk: {
+          toolId: 'repo.patch',
+          category: 'write',
+          estimatedImpact: 'medium',
+          touchesSecrets: false,
+          touchesConfig: false,
+          touchesBuild: false,
+        },
+      });
 
     // 3. Verify approval is pending
     const pending = kernel.runManager.approvalGate.getPending();
@@ -247,7 +267,8 @@ describe('E2E: Approval Flow', () => {
         body: JSON.stringify({ decision: 'approve', reason: 'Looks good' }),
       }),
     );
-    const approveBody = await approveRes.json() as any;
+    // biome-ignore lint/suspicious/noExplicitAny: Test helpder
+    const approveBody = (await approveRes.json()) as any;
     expect(approveBody.status).toBe('resolved');
 
     // 5. The approval promise should resolve
@@ -304,17 +325,72 @@ describe('E2E: Skills + Context Assembly', () => {
 
   it('projects events into conversation messages', () => {
     const events: AgentEvent[] = [
-      { eventId: 'e1', runId: 'r1', sessionId: 's1', seq: 1, ts: now(), type: 'run.started', payload: {} },
-      { eventId: 'e2', runId: 'r1', sessionId: 's1', seq: 2, ts: now(), type: 'output.delta', payload: { text: 'Looking at ' } },
-      { eventId: 'e3', runId: 'r1', sessionId: 's1', seq: 3, ts: now(), type: 'output.delta', payload: { text: 'the code...' } },
-      { eventId: 'e4', runId: 'r1', sessionId: 's1', seq: 4, ts: now(), type: 'tool.call', payload: { callId: 'c1', toolId: 'repo.read', args: { path: 'src/hello.ts' } } },
-      { eventId: 'e5', runId: 'r1', sessionId: 's1', seq: 5, ts: now(), type: 'tool.result', payload: { callId: 'c1', toolId: 'repo.read', result: 'const x = 1;' } },
-      { eventId: 'e6', runId: 'r1', sessionId: 's1', seq: 6, ts: now(), type: 'output.delta', payload: { text: 'Done!' } },
+      {
+        eventId: 'e1',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 1,
+        ts: now(),
+        type: 'run.started',
+        payload: {},
+      },
+      {
+        eventId: 'e2',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 2,
+        ts: now(),
+        type: 'output.delta',
+        payload: { text: 'Looking at ' },
+      },
+      {
+        eventId: 'e3',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 3,
+        ts: now(),
+        type: 'output.delta',
+        payload: { text: 'the code...' },
+      },
+      {
+        eventId: 'e4',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 4,
+        ts: now(),
+        type: 'tool.call',
+        payload: {
+          callId: 'c1',
+          toolId: 'repo.read',
+          args: { path: 'src/hello.ts' },
+        },
+      },
+      {
+        eventId: 'e5',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 5,
+        ts: now(),
+        type: 'tool.result',
+        payload: { callId: 'c1', toolId: 'repo.read', result: 'const x = 1;' },
+      },
+      {
+        eventId: 'e6',
+        runId: 'r1',
+        sessionId: 's1',
+        seq: 6,
+        ts: now(),
+        type: 'output.delta',
+        payload: { text: 'Done!' },
+      },
     ];
 
     const messages = projectMessages(events);
     expect(messages).toHaveLength(4);
-    expect(messages[0]).toEqual({ role: 'assistant', content: 'Looking at the code...' });
+    expect(messages[0]).toEqual({
+      role: 'assistant',
+      content: 'Looking at the code...',
+    });
     expect(messages[1].role).toBe('assistant');
     // @ts-ignore - toolCallId is checked
     expect(messages[1].toolCallId).toBe('c1');
@@ -344,11 +420,51 @@ describe('E2E: Observability Event Tracing', () => {
     const runId = 'e2e-run-1';
 
     const events: AgentEvent[] = [
-      { eventId: 'e1', runId, sessionId: 's1', seq: 1, ts: now(), type: 'run.started', payload: {} },
-      { eventId: 'e2', runId, sessionId: 's1', seq: 2, ts: now(), type: 'tool.call', payload: { callId: 'c1', toolId: 'repo.read' } },
-      { eventId: 'e3', runId, sessionId: 's1', seq: 3, ts: now(), type: 'tool.result', payload: { callId: 'c1', toolId: 'repo.read', durationMs: 15 } },
-      { eventId: 'e4', runId, sessionId: 's1', seq: 4, ts: now(), type: 'output.delta', payload: { text: 'result' } },
-      { eventId: 'e5', runId, sessionId: 's1', seq: 5, ts: now(), type: 'run.completed', payload: {} },
+      {
+        eventId: 'e1',
+        runId,
+        sessionId: 's1',
+        seq: 1,
+        ts: now(),
+        type: 'run.started',
+        payload: {},
+      },
+      {
+        eventId: 'e2',
+        runId,
+        sessionId: 's1',
+        seq: 2,
+        ts: now(),
+        type: 'tool.call',
+        payload: { callId: 'c1', toolId: 'repo.read' },
+      },
+      {
+        eventId: 'e3',
+        runId,
+        sessionId: 's1',
+        seq: 3,
+        ts: now(),
+        type: 'tool.result',
+        payload: { callId: 'c1', toolId: 'repo.read', durationMs: 15 },
+      },
+      {
+        eventId: 'e4',
+        runId,
+        sessionId: 's1',
+        seq: 4,
+        ts: now(),
+        type: 'output.delta',
+        payload: { text: 'result' },
+      },
+      {
+        eventId: 'e5',
+        runId,
+        sessionId: 's1',
+        seq: 5,
+        ts: now(),
+        type: 'run.completed',
+        payload: {},
+      },
     ];
 
     for (const event of events) {
@@ -361,6 +477,7 @@ describe('E2E: Observability Event Tracing', () => {
     const spans = exporter?.getFinishedSpans() ?? [];
     expect(spans.length).toBeGreaterThanOrEqual(2);
 
+    // biome-ignore lint/suspicious/noExplicitAny: Test helper
     const spanNames = spans.map((s: any) => s.name);
     expect(spanNames).toContain(`run:${runId}`);
     expect(spanNames).toContain('tool:c1');

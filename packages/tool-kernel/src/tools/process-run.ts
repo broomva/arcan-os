@@ -3,13 +3,16 @@
  * (V1 spec §37: process.run(command, cwd?))
  */
 
+import { resolve } from 'node:path';
+import type { ToolContext, ToolHandler } from '@agent-os/core';
 import { z } from 'zod';
-import { resolve } from 'path';
-import type { ToolHandler, ToolContext } from '@agent-os/core';
 
 export const inputSchema = z.object({
   command: z.string().describe('The shell command to execute'),
-  cwd: z.string().optional().describe('Working directory (relative to workspace root)'),
+  cwd: z
+    .string()
+    .optional()
+    .describe('Working directory (relative to workspace root)'),
 });
 
 type Input = z.infer<typeof inputSchema>;

@@ -5,7 +5,12 @@
  * Merges: base prompt + skills + workspace info.
  */
 
-import type { EngineRunRequest, EngineMessage, RunConfig, SessionSnapshotData } from '@agent-os/core';
+import type {
+  EngineMessage,
+  EngineRunRequest,
+  RunConfig,
+  SessionSnapshotData,
+} from '@agent-os/core';
 import type { ToolHandler } from '@agent-os/core';
 import type { SkillRegistry } from '@agent-os/skills';
 import { injectSkills } from '@agent-os/skills';
@@ -47,7 +52,10 @@ export class ContextAssembler {
     tools: ToolHandler[];
     sessionSnapshot?: SessionSnapshotData;
   }): EngineRunRequest {
-    const systemPrompt = this.buildSystemPrompt(opts.runConfig, opts.sessionSnapshot);
+    const systemPrompt = this.buildSystemPrompt(
+      opts.runConfig,
+      opts.sessionSnapshot,
+    );
 
     return {
       runConfig: opts.runConfig,
@@ -101,11 +109,11 @@ export class ContextAssembler {
    * Build Observational Memory section.
    * In a real implementation, this would query the EventStore or a vector DB.
    * For now, we assume the snapshot data is passed in effectively or we query it if we had the store.
-   * 
+   *
    * @todo In v2, ContextAssembler should have access to EventStore to look up the session snapshot.
    * For now, we'll assume the `RunConfig` or an auxiliary mechanism provides it,
    * OR we just pass the snapshot in `assemble`.
-   * 
+   *
    * Let's change `assemble` to accept an optional `snapshot` of type `SessionSnapshotData`.
    */
   private buildMemorySection(snapshot?: SessionSnapshotData): string {
@@ -118,9 +126,9 @@ export class ContextAssembler {
       const topReflections = snapshot.reflections
         .sort((a, b) => b.frequency - a.frequency) // Sort by frequency
         .slice(0, 5) // Top 5
-        .map(r => `- ${r.topic}: ${r.content}`)
+        .map((r) => `- ${r.topic}: ${r.content}`)
         .join('\n');
-      
+
       sections.push(`## Long-Term Memory (Reflections)\n${topReflections}`);
     }
 
@@ -129,7 +137,7 @@ export class ContextAssembler {
       const recentObs = snapshot.observations
         .sort((a, b) => b.ts - a.ts) // Newest first
         .slice(0, 10) // Last 10
-        .map(o => `- [${o.type}] ${o.content}`)
+        .map((o) => `- [${o.type}] ${o.content}`)
         .join('\n');
 
       sections.push(`## Recent Observations\n${recentObs}`);

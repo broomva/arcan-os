@@ -6,11 +6,11 @@
  * This module configures the TracerProvider and exporters.
  */
 
-import { trace, type Tracer } from '@opentelemetry/api';
+import { type Tracer, trace } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
-  SimpleSpanProcessor,
   InMemorySpanExporter,
+  SimpleSpanProcessor,
   type SpanExporter,
 } from '@opentelemetry/sdk-trace-base';
 
@@ -57,10 +57,10 @@ export function setupTelemetry(config: OTelConfig = {}): Tracer {
   if (config.otlpEndpoint) {
     try {
       // Dynamic import to keep it optional
-      const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-      exporters.push(
-        new OTLPTraceExporter({ url: config.otlpEndpoint }),
-      );
+      const {
+        OTLPTraceExporter,
+      } = require('@opentelemetry/exporter-trace-otlp-http');
+      exporters.push(new OTLPTraceExporter({ url: config.otlpEndpoint }));
     } catch {
       console.warn(
         '[agent-os/observability] OTLP exporter not available. Install @opentelemetry/exporter-trace-otlp-http',
@@ -127,7 +127,9 @@ function createLangSmithExporter(config: {
 }): SpanExporter | null {
   try {
     // LangSmith accepts OTel traces at its OTLP endpoint
-    const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+    const {
+      OTLPTraceExporter,
+    } = require('@opentelemetry/exporter-trace-otlp-http');
 
     const endpoint = config.endpoint ?? 'https://api.smith.langchain.com';
     const project = config.project ?? 'agent-os';

@@ -15,6 +15,11 @@ Agent OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
 - `docs/AGENT_OS_KERNEL.md` — Kernel architecture overview
 - `docs/OPENAI_CODEX_ARCHITECTURE_ANALYSIS.md` — Reference architecture analysis
 
+### AI Assistant Guidelines
+- **Cursor**: Follow `.cursorrules` for coding standards.
+- **Claude Code**: Refer to `CLAUDE.md` for project commands.
+- **Linter**: Run `bun run check` to verify code quality (Biome).
+
 ---
 
 ## Technology Stack

@@ -2,9 +2,9 @@
  * @agent-os/event-store — Tests
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { EventStore } from '../src/event-store.js';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import type { AgentEvent } from '@agent-os/core';
+import { EventStore } from '../src/event-store.js';
 
 describe('EventStore', () => {
   let store: EventStore;
@@ -77,14 +77,49 @@ describe('EventStore', () => {
   describe('query', () => {
     beforeEach(() => {
       // Seed events for two runs in one session
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'run.started', payload: {} });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'tool.call', payload: { callId: 'c1', toolId: 'repo.read', args: {} } });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'tool.result', payload: { callId: 'c1', result: 'ok' } });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'output.delta', payload: { text: 'hello' } });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'run.completed', payload: { summary: 'done' } });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'run.started',
+        payload: {},
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'tool.call',
+        payload: { callId: 'c1', toolId: 'repo.read', args: {} },
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'tool.result',
+        payload: { callId: 'c1', result: 'ok' },
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'output.delta',
+        payload: { text: 'hello' },
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'run.completed',
+        payload: { summary: 'done' },
+      });
 
-      store.append({ runId: 'run-2', sessionId: 'sess-1', type: 'run.started', payload: {} });
-      store.append({ runId: 'run-2', sessionId: 'sess-1', type: 'output.delta', payload: { text: 'hi' } });
+      store.append({
+        runId: 'run-2',
+        sessionId: 'sess-1',
+        type: 'run.started',
+        payload: {},
+      });
+      store.append({
+        runId: 'run-2',
+        sessionId: 'sess-1',
+        type: 'output.delta',
+        payload: { text: 'hi' },
+      });
     });
 
     it('queries by runId', () => {
@@ -135,9 +170,24 @@ describe('EventStore', () => {
 
   describe('getByRunId', () => {
     it('returns all events for a run in order', () => {
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'run.started', payload: {} });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'output.delta', payload: { text: 'a' } });
-      store.append({ runId: 'run-1', sessionId: 'sess-1', type: 'run.completed', payload: {} });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'run.started',
+        payload: {},
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'output.delta',
+        payload: { text: 'a' },
+      });
+      store.append({
+        runId: 'run-1',
+        sessionId: 'sess-1',
+        type: 'run.completed',
+        payload: {},
+      });
 
       const events = store.getByRunId('run-1');
       expect(events).toHaveLength(3);
@@ -152,13 +202,35 @@ describe('EventStore', () => {
 
   describe('queryLatest', () => {
     it('returns the latest event of a type for a session', () => {
-      store.append({ runId: 'r1', sessionId: 's1', type: 'working_memory.snapshot', payload: { data: { v: 1 } } });
-      store.append({ runId: 'r1', sessionId: 's1', type: 'output.delta', payload: {} });
-      store.append({ runId: 'r1', sessionId: 's1', type: 'working_memory.snapshot', payload: { data: { v: 2 } } });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'working_memory.snapshot',
+        payload: { data: { v: 1 } },
+      });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'output.delta',
+        payload: {},
+      });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'working_memory.snapshot',
+        payload: { data: { v: 2 } },
+      });
 
       const latest = store.queryLatest('s1', 'working_memory.snapshot');
       expect(latest).not.toBeNull();
-      expect((latest!.payload as any).data.v).toBe(2);
+      expect(
+        (
+          (latest?.payload as Record<string, unknown>)?.data as Record<
+            string,
+            unknown
+          >
+        )?.v,
+      ).toBe(2);
     });
 
     it('returns null when no events match', () => {
@@ -189,21 +261,28 @@ describe('EventStore', () => {
         type: 'run',
       });
       expect(retrieved).not.toBeNull();
-      expect(retrieved!.data).toEqual({ state: 'completed', summary: 'done' });
+      expect(retrieved?.data).toEqual({ state: 'completed', summary: 'done' });
     });
 
     it('returns the latest snapshot by seq', () => {
       store.createSnapshot({
-        sessionId: 's1', seq: 5, type: 'session',
+        sessionId: 's1',
+        seq: 5,
+        type: 'session',
         data: { version: 1 },
       });
       store.createSnapshot({
-        sessionId: 's1', seq: 15, type: 'session',
+        sessionId: 's1',
+        seq: 15,
+        type: 'session',
         data: { version: 2 },
       });
 
-      const latest = store.getLatestSnapshot({ sessionId: 's1', type: 'session' });
-      expect((latest!.data as any).version).toBe(2);
+      const latest = store.getLatestSnapshot({
+        sessionId: 's1',
+        type: 'session',
+      });
+      expect((latest?.data as Record<string, unknown>)?.version).toBe(2);
     });
 
     it('returns null when no snapshots exist', () => {
@@ -218,16 +297,36 @@ describe('EventStore', () => {
 
   describe('rebuildSeqCounters', () => {
     it('restores seq counters from existing data', () => {
-      store.append({ runId: 'r1', sessionId: 's1', type: 'run.started', payload: {} });
-      store.append({ runId: 'r1', sessionId: 's1', type: 'output.delta', payload: {} });
-      store.append({ runId: 'r1', sessionId: 's1', type: 'run.completed', payload: {} });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'run.started',
+        payload: {},
+      });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'output.delta',
+        payload: {},
+      });
+      store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'run.completed',
+        payload: {},
+      });
 
       // Simulate daemon restart — create new store on same db wouldn't
       // work with :memory:, so we test the method directly
       store.rebuildSeqCounters();
 
       // Next append should continue from seq 4
-      const e4 = store.append({ runId: 'r1', sessionId: 's1', type: 'run.started', payload: {} });
+      const e4 = store.append({
+        runId: 'r1',
+        sessionId: 's1',
+        type: 'run.started',
+        payload: {},
+      });
       expect(e4.seq).toBe(4);
     });
   });

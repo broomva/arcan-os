@@ -33,7 +33,7 @@ export function injectSkills(skills: Skill[]): string {
 
   const sections = skills.map((skill) => {
     const header = `<skill name="${skill.name}">`;
-    const footer = `</skill>`;
+    const footer = '</skill>';
 
     return `${header}\n${skill.content}\n${footer}`;
   });

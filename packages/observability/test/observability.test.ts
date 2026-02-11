@@ -2,14 +2,14 @@
  * @agent-os/observability — Tests
  */
 
-import { describe, expect, it, afterEach } from 'bun:test';
+import { afterEach, describe, expect, it } from 'bun:test';
+import type { AgentEvent } from '@agent-os/core';
+import { EventTracer } from '../src/event-tracer.js';
 import {
+  getInMemoryExporter,
   setupTelemetry,
   shutdownTelemetry,
-  getInMemoryExporter,
 } from '../src/otel-setup.js';
-import { EventTracer } from '../src/event-tracer.js';
-import type { AgentEvent } from '@agent-os/core';
 
 // =========================================================================
 // OTel Setup
@@ -39,7 +39,7 @@ describe('setupTelemetry', () => {
     span.end();
 
     const exporter = getInMemoryExporter();
-    const spans = exporter!.getFinishedSpans();
+    const spans = exporter?.getFinishedSpans();
     expect(spans.length).toBeGreaterThanOrEqual(1);
   });
 });
@@ -88,7 +88,11 @@ describe('EventTracer', () => {
     expect(eventTracer.activeSpanCount).toBe(1);
 
     eventTracer.traceEvent(
-      makeEvent('tool.result', { callId: 'c1', toolId: 'repo.read', durationMs: 42 }, 2),
+      makeEvent(
+        'tool.result',
+        { callId: 'c1', toolId: 'repo.read', durationMs: 42 },
+        2,
+      ),
     );
     expect(eventTracer.activeSpanCount).toBe(0);
   });
@@ -98,12 +102,20 @@ describe('EventTracer', () => {
     const eventTracer = new EventTracer(tracer);
 
     eventTracer.traceEvent(
-      makeEvent('approval.requested', { approvalId: 'a1', toolId: 'repo.patch' }, 1),
+      makeEvent(
+        'approval.requested',
+        { approvalId: 'a1', toolId: 'repo.patch' },
+        1,
+      ),
     );
     expect(eventTracer.activeSpanCount).toBe(1);
 
     eventTracer.traceEvent(
-      makeEvent('approval.resolved', { approvalId: 'a1', decision: 'approve' }, 2),
+      makeEvent(
+        'approval.resolved',
+        { approvalId: 'a1', decision: 'approve' },
+        2,
+      ),
     );
     expect(eventTracer.activeSpanCount).toBe(0);
   });
@@ -119,7 +131,11 @@ describe('EventTracer', () => {
     expect(eventTracer.activeSpanCount).toBe(2);
 
     eventTracer.traceEvent(
-      makeEvent('tool.result', { callId: 'c1', toolId: 'repo.read', durationMs: 10 }, 3),
+      makeEvent(
+        'tool.result',
+        { callId: 'c1', toolId: 'repo.read', durationMs: 10 },
+        3,
+      ),
     );
     expect(eventTracer.activeSpanCount).toBe(1);
 

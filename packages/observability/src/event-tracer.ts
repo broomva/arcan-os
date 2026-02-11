@@ -5,8 +5,14 @@
  * Covers: tool execution timing, approval wait time, run lifecycle.
  */
 
-import { trace, SpanKind, SpanStatusCode, type Tracer, type Span } from '@opentelemetry/api';
 import type { AgentEvent } from '@agent-os/core';
+import {
+  type Span,
+  SpanKind,
+  SpanStatusCode,
+  type Tracer,
+  trace,
+} from '@opentelemetry/api';
 
 // ---------------------------------------------------------------------------
 // Event Tracer
@@ -36,7 +42,10 @@ export class EventTracer {
       case 'run.completed':
       case 'run.failed':
         this.endSpan(`run:${event.runId}`, {
-          status: event.type === 'run.failed' ? SpanStatusCode.ERROR : SpanStatusCode.OK,
+          status:
+            event.type === 'run.failed'
+              ? SpanStatusCode.ERROR
+              : SpanStatusCode.OK,
         });
         break;
 
@@ -87,7 +96,7 @@ export class EventTracer {
         break;
       }
 
-      default:
+      default: {
         // Record as a simple event on the run span
         const runSpan = this.activeSpans.get(`run:${event.runId}`);
         if (runSpan) {
@@ -97,6 +106,7 @@ export class EventTracer {
           });
         }
         break;
+      }
     }
   }
 

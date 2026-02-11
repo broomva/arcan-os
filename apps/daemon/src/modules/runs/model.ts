@@ -17,7 +17,9 @@ export namespace RunModel {
     prompt: t.String({ description: 'User prompt to send to the agent' }),
     model: t.Optional(t.String({ description: 'Model spec: provider/model' })),
     workspace: t.Optional(t.String({ description: 'Workspace root path' })),
-    skills: t.Optional(t.Array(t.String(), { description: 'Active skill names' })),
+    skills: t.Optional(
+      t.Array(t.String(), { description: 'Active skill names' }),
+    ),
     maxSteps: t.Optional(t.Number({ description: 'Max agent loop steps' })),
   });
   export type createBody = typeof createBody.static;

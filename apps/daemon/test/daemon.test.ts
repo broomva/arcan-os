@@ -4,9 +4,9 @@
  * Tests the daemon HTTP API endpoints without an LLM.
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { createKernel } from '../src/kernel';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { createApp } from '../src/app';
+import { createKernel } from '../src/kernel';
 
 describe('Daemon API', () => {
   let app: ReturnType<typeof createApp>;
@@ -53,7 +53,11 @@ describe('Daemon API', () => {
         }),
       );
 
-      const body = await res.json() as any;
+      const body = (await res.json()) as {
+        runId: string;
+        sessionId: string;
+        state: string;
+      };
       expect(body.runId).toBeTruthy();
       expect(body.sessionId).toBe('test-session');
       expect(body.state).toBe('running');
@@ -102,7 +106,7 @@ describe('Daemon API', () => {
           body: JSON.stringify({ sessionId: 's1', prompt: 'test' }),
         }),
       );
-      const createBody = await createRes.json() as any;
+      const createBody = (await createRes.json()) as { runId: string };
       const runId = createBody.runId;
 
       // Add more events
@@ -137,20 +141,21 @@ describe('Daemon API', () => {
   describe('POST /v1/approvals/:approvalId', () => {
     it('resolves a pending approval', async () => {
       // Create a pending approval
-      const { approvalId, promise } = kernel.runManager.approvalGate.requestApproval({
-        callId: 'c1',
-        toolId: 'repo.patch',
-        args: {},
-        preview: {},
-        risk: {
+      const { approvalId, promise } =
+        kernel.runManager.approvalGate.requestApproval({
+          callId: 'c1',
           toolId: 'repo.patch',
-          category: 'write',
-          estimatedImpact: 'medium',
-          touchesSecrets: false,
-          touchesConfig: false,
-          touchesBuild: false,
-        },
-      });
+          args: {},
+          preview: {},
+          risk: {
+            toolId: 'repo.patch',
+            category: 'write',
+            estimatedImpact: 'medium',
+            touchesSecrets: false,
+            touchesConfig: false,
+            touchesBuild: false,
+          },
+        });
 
       const res = await app.handle(
         new Request(`http://localhost/v1/approvals/${approvalId}`, {
@@ -160,7 +165,7 @@ describe('Daemon API', () => {
         }),
       );
 
-      const body = await res.json() as any;
+      const body = (await res.json()) as { status: string };
       expect(body.status).toBe('resolved');
 
       const decision = await promise;
@@ -194,7 +199,7 @@ describe('Daemon API', () => {
           body: JSON.stringify({ sessionId: 'state-test', prompt: 'test' }),
         }),
       );
-      const { runId } = await createRes.json() as any;
+      const { runId } = (await createRes.json()) as { runId: string };
 
       kernel.runManager.emit(runId, 'output.delta', { text: 'hi' });
 
@@ -203,7 +208,11 @@ describe('Daemon API', () => {
         new Request('http://localhost/v1/sessions/state-test/state'),
       );
 
-      const state = await stateRes.json() as any;
+      const state = (await stateRes.json()) as {
+        sessionId: string;
+        pendingEvents: unknown[];
+        snapshot: unknown;
+      };
       expect(state.sessionId).toBe('state-test');
       // started + engine.request + output.delta = 3
       expect(state.pendingEvents.length).toBeGreaterThanOrEqual(2);
@@ -219,7 +228,7 @@ describe('Daemon API', () => {
           body: JSON.stringify({ sessionId: 'snap-test', prompt: 'test' }),
         }),
       );
-      const { runId } = await createRes.json() as any;
+      const { runId } = (await createRes.json()) as { runId: string };
 
       // Create a snapshot at seq 1
       kernel.eventStore.createSnapshot({
@@ -236,13 +245,16 @@ describe('Daemon API', () => {
       const stateRes = await app.handle(
         new Request('http://localhost/v1/sessions/snap-test/state'),
       );
-      const state = await stateRes.json() as any;
+      const state = (await stateRes.json()) as {
+        snapshot: { data: { summary: string } };
+        pendingEvents: { seq: number }[];
+      };
 
       expect(state.snapshot).not.toBeNull();
       expect(state.snapshot.data.summary).toBe('snapped at 1');
       // pendingEvents should only be events after seq 1
       expect(state.pendingEvents.length).toBeGreaterThan(0);
-      expect(state.pendingEvents.every((e: any) => e.seq > 1)).toBe(true);
+      expect(state.pendingEvents.every((e) => e.seq > 1)).toBe(true);
     });
   });
 });

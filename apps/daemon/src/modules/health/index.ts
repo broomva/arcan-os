@@ -4,9 +4,8 @@
 
 import { Elysia } from 'elysia';
 
-export const health = new Elysia({ prefix: '/v1/health' })
-  .get('/', () => ({
-    status: 'ok' as const,
-    version: '0.1.0',
-    ts: Date.now(),
-  }));
+export const health = new Elysia({ prefix: '/v1/health' }).get('/', () => ({
+  status: 'ok' as const,
+  version: '0.1.0',
+  ts: Date.now(),
+}));

@@ -2,13 +2,13 @@
  * @agent-os/context — Tests
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { join } from 'path';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type { AgentEvent, EngineMessage } from '@agent-os/core';
+import { SkillRegistry } from '@agent-os/skills';
 import { ContextAssembler } from '../src/context-assembler.js';
 import { projectMessages } from '../src/message-history.js';
-import { SkillRegistry } from '@agent-os/skills';
-import type { AgentEvent, EngineMessage } from '@agent-os/core';
 
 const TEST_DIR = join(import.meta.dir, '__test_workspace__');
 
@@ -141,8 +141,16 @@ describe('projectMessages', () => {
 
   it('maps tool calls to assistant messages', () => {
     const events: AgentEvent[] = [
-      makeEvent('tool.call', { callId: 'c1', toolId: 'repo.read', args: { path: 'test.ts' } }, 1),
-      makeEvent('tool.result', { callId: 'c1', toolId: 'repo.read', result: 'file contents' }, 2),
+      makeEvent(
+        'tool.call',
+        { callId: 'c1', toolId: 'repo.read', args: { path: 'test.ts' } },
+        1,
+      ),
+      makeEvent(
+        'tool.result',
+        { callId: 'c1', toolId: 'repo.read', result: 'file contents' },
+        2,
+      ),
     ];
 
     const msgs = projectMessages(events);
@@ -156,8 +164,16 @@ describe('projectMessages', () => {
   it('flushes accumulated deltas before tool calls', () => {
     const events: AgentEvent[] = [
       makeEvent('output.delta', { text: 'Let me check...' }, 1),
-      makeEvent('tool.call', { callId: 'c1', toolId: 'repo.read', args: {} }, 2),
-      makeEvent('tool.result', { callId: 'c1', toolId: 'repo.read', result: 'data' }, 3),
+      makeEvent(
+        'tool.call',
+        { callId: 'c1', toolId: 'repo.read', args: {} },
+        2,
+      ),
+      makeEvent(
+        'tool.result',
+        { callId: 'c1', toolId: 'repo.read', result: 'data' },
+        3,
+      ),
       makeEvent('output.delta', { text: 'Done!' }, 4),
     ];
 

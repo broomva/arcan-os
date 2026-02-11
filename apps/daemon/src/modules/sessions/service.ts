@@ -5,11 +5,11 @@
 import type { EventStore } from '@agent-os/event-store';
 import type { RunManager } from '@agent-os/run-manager';
 
-export abstract class SessionService {
+export const SessionService = {
   /**
    * Get materialized state for a session: latest snapshot + pending events.
    */
-  static getState(eventStore: EventStore, runManager: RunManager, sessionId: string) {
+  getState(eventStore: EventStore, runManager: RunManager, sessionId: string) {
     const snapshot = eventStore.getLatestSnapshot({ sessionId });
     const afterSeq = snapshot?.seq ?? 0;
 
@@ -26,5 +26,5 @@ export abstract class SessionService {
       pendingApprovals: runManager.approvalGate.getPending(),
       ts: Date.now(),
     };
-  }
-}
+  },
+};

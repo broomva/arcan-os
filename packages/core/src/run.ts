@@ -10,7 +10,12 @@
 // ---------------------------------------------------------------------------
 
 /** Valid states for a run. Transitions: created → running → paused ↔ running → completed | failed */
-export type RunState = 'created' | 'running' | 'paused' | 'completed' | 'failed';
+export type RunState =
+  | 'created'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'failed';
 
 /** Valid state transitions */
 export const VALID_TRANSITIONS: Record<RunState, RunState[]> = {

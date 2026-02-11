@@ -9,15 +9,15 @@
 import type {
   AgentEngine,
   AgentEvent,
-  RunConfig,
-  RunRecord,
-  RunState,
-  RunStartedPayload,
+  EngineRunRequest,
   RunCompletedPayload,
+  RunConfig,
   RunFailedPayload,
   RunPausedPayload,
+  RunRecord,
   RunResumedPayload,
-  EngineRunRequest,
+  RunStartedPayload,
+  RunState,
   VALID_TRANSITIONS,
 } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
@@ -107,10 +107,7 @@ export class RunManager {
    * Pause a run (for approval gating).
    * Transitions: running → paused
    */
-  pauseRun(
-    runId: string,
-    approvalId: string,
-  ): AgentEvent<RunPausedPayload> {
+  pauseRun(runId: string, approvalId: string): AgentEvent<RunPausedPayload> {
     const record = this.getRunOrThrow(runId);
     this.assertTransition(record, 'paused');
 
@@ -143,10 +140,7 @@ export class RunManager {
    * Complete a run successfully.
    * Transitions: running → completed
    */
-  completeRun(
-    runId: string,
-    summary: string,
-  ): AgentEvent<RunCompletedPayload> {
+  completeRun(runId: string, summary: string): AgentEvent<RunCompletedPayload> {
     const record = this.getRunOrThrow(runId);
     this.assertTransition(record, 'completed');
 
@@ -209,10 +203,7 @@ export class RunManager {
   /**
    * Add token usage for a run.
    */
-  addTokenUsage(
-    runId: string,
-    usage: { input: number; output: number },
-  ): void {
+  addTokenUsage(runId: string, usage: { input: number; output: number }): void {
     const record = this.getRunOrThrow(runId);
     record.tokenUsage.input += usage.input;
     record.tokenUsage.output += usage.output;
@@ -278,11 +269,7 @@ export class RunManager {
    * Emit an event without changing run state (for tool.call, output.delta, etc.)
    * This is public so the engine adapter can emit events through the run manager.
    */
-  emit<T>(
-    runId: string,
-    type: AgentEvent['type'],
-    payload: T,
-  ): AgentEvent<T> {
+  emit<T>(runId: string, type: AgentEvent['type'], payload: T): AgentEvent<T> {
     const record = this.getRunOrThrow(runId);
     return this.emitEvent<T>(record, type, payload);
   }

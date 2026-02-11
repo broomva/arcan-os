@@ -3,13 +3,16 @@
  * (V1 spec §37: repo.read(path, range?))
  */
 
+import { readFileSync } from 'node:fs';
+import type { ToolContext, ToolHandler } from '@agent-os/core';
 import { z } from 'zod';
-import { readFileSync } from 'fs';
-import type { ToolHandler, ToolContext } from '@agent-os/core';
 
 export const inputSchema = z.object({
   path: z.string().describe('Relative path to the file within the workspace'),
-  startLine: z.number().optional().describe('Start line (1-indexed, inclusive)'),
+  startLine: z
+    .number()
+    .optional()
+    .describe('Start line (1-indexed, inclusive)'),
   endLine: z.number().optional().describe('End line (1-indexed, inclusive)'),
 });
 
@@ -30,7 +33,7 @@ export const repoRead: ToolHandler<Input, Output> = {
   category: 'read',
 
   async execute(input: Input, ctx: ToolContext): Promise<Output> {
-    const { resolve, join } = await import('path');
+    const { resolve, join } = await import('node:path');
     const fullPath = resolve(ctx.workspaceRoot, input.path);
 
     const content = readFileSync(fullPath, 'utf-8');

@@ -5,10 +5,15 @@
  * (V1 spec §41)
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type {
+  ControlPath,
+  PolicyConfig,
+  RiskProfile,
+  ToolPolicy,
+} from '@agent-os/core';
 import { parse as parseYaml } from 'yaml';
-import { join } from 'path';
-import type { PolicyConfig, ToolPolicy, ControlPath, RiskProfile } from '@agent-os/core';
 
 // ---------------------------------------------------------------------------
 // Default policy (when no policy.yaml exists)
@@ -68,7 +73,10 @@ export class PolicyEngine {
       return {
         workspace: { ...DEFAULT_POLICY.workspace, ...parsed.workspace },
         execution: { ...DEFAULT_POLICY.execution, ...parsed.execution },
-        capabilities: { ...DEFAULT_POLICY.capabilities, ...parsed.capabilities },
+        capabilities: {
+          ...DEFAULT_POLICY.capabilities,
+          ...parsed.capabilities,
+        },
         risk: { ...DEFAULT_POLICY.risk, ...parsed.risk },
         redaction: { ...DEFAULT_POLICY.redaction, ...parsed.redaction },
         limits: { ...DEFAULT_POLICY.limits, ...parsed.limits },
@@ -82,9 +90,7 @@ export class PolicyEngine {
    * Get the policy for a specific tool.
    */
   getToolPolicy(toolId: string): ToolPolicy {
-    return (
-      this.config.capabilities[toolId] ?? { approval: 'risk' }
-    );
+    return this.config.capabilities[toolId] ?? { approval: 'risk' };
   }
 
   /**

@@ -40,7 +40,10 @@ export function projectMessages(events: AgentEvent[]): EngineMessage[] {
       case 'output.message': {
         // Flush any accumulated deltas first
         if (currentAssistant) {
-          messages.push({ role: 'assistant', content: currentAssistant.content });
+          messages.push({
+            role: 'assistant',
+            content: currentAssistant.content,
+          });
           currentAssistant = null;
         }
         const payload = event.payload as { text: string };
@@ -51,7 +54,10 @@ export function projectMessages(events: AgentEvent[]): EngineMessage[] {
       case 'tool.call': {
         // Flush accumulated deltas
         if (currentAssistant) {
-          messages.push({ role: 'assistant', content: currentAssistant.content });
+          messages.push({
+            role: 'assistant',
+            content: currentAssistant.content,
+          });
           currentAssistant = null;
         }
         const payload = event.payload as {

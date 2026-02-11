@@ -2,11 +2,11 @@
  * @agent-os/run-manager — Tests
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test';
-import { EventStore } from '@agent-os/event-store';
-import { RunManager } from '../src/run-manager.js';
-import { ApprovalGate } from '../src/approval-gate.js';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import type { AgentEvent } from '@agent-os/core';
+import { EventStore } from '@agent-os/event-store';
+import { ApprovalGate } from '../src/approval-gate.js';
+import { RunManager } from '../src/run-manager.js';
 
 // =========================================================================
 // ApprovalGate tests
@@ -20,7 +20,14 @@ describe('ApprovalGate', () => {
   });
 
   it('creates a pending approval that resolves on approve', async () => {
-    const risk = { toolId: 'repo.patch', category: 'write' as const, estimatedImpact: 'medium' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
+    const risk = {
+      toolId: 'repo.patch',
+      category: 'write' as const,
+      estimatedImpact: 'medium' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
     const { approvalId, promise } = gate.requestApproval({
       callId: 'c1',
       toolId: 'repo.patch',
@@ -40,7 +47,14 @@ describe('ApprovalGate', () => {
   });
 
   it('creates a pending approval that resolves on deny', async () => {
-    const risk = { toolId: 'process.run', category: 'exec' as const, estimatedImpact: 'large' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
+    const risk = {
+      toolId: 'process.run',
+      category: 'exec' as const,
+      estimatedImpact: 'large' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
     const { approvalId, promise } = gate.requestApproval({
       callId: 'c2',
       toolId: 'process.run',
@@ -57,7 +71,9 @@ describe('ApprovalGate', () => {
   });
 
   it('throws on resolving unknown approval', () => {
-    expect(() => gate.resolveApproval('nope', { decision: 'approve' })).toThrow();
+    expect(() =>
+      gate.resolveApproval('nope', { decision: 'approve' }),
+    ).toThrow();
   });
 
   it('cancels individual approvals', async () => {
@@ -66,7 +82,14 @@ describe('ApprovalGate', () => {
       toolId: 'test',
       args: {},
       preview: {},
-      risk: { toolId: 'test', category: 'read', estimatedImpact: 'small', touchesSecrets: false, touchesConfig: false, touchesBuild: false },
+      risk: {
+        toolId: 'test',
+        category: 'read',
+        estimatedImpact: 'small',
+        touchesSecrets: false,
+        touchesConfig: false,
+        touchesBuild: false,
+      },
     });
 
     gate.cancelApproval(approvalId);
@@ -75,9 +98,28 @@ describe('ApprovalGate', () => {
   });
 
   it('cancels all pending approvals', async () => {
-    const risk = { toolId: 't', category: 'read' as const, estimatedImpact: 'small' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
-    const { promise: p1 } = gate.requestApproval({ callId: 'c1', toolId: 't', args: {}, preview: {}, risk });
-    const { promise: p2 } = gate.requestApproval({ callId: 'c2', toolId: 't', args: {}, preview: {}, risk });
+    const risk = {
+      toolId: 't',
+      category: 'read' as const,
+      estimatedImpact: 'small' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
+    const { promise: p1 } = gate.requestApproval({
+      callId: 'c1',
+      toolId: 't',
+      args: {},
+      preview: {},
+      risk,
+    });
+    const { promise: p2 } = gate.requestApproval({
+      callId: 'c2',
+      toolId: 't',
+      args: {},
+      preview: {},
+      risk,
+    });
 
     gate.cancelAll();
 
@@ -87,13 +129,32 @@ describe('ApprovalGate', () => {
   });
 
   it('lists pending approvals', () => {
-    const risk = { toolId: 't', category: 'read' as const, estimatedImpact: 'small' as const, touchesSecrets: false, touchesConfig: false, touchesBuild: false };
-    gate.requestApproval({ callId: 'c1', toolId: 'a', args: {}, preview: {}, risk });
-    gate.requestApproval({ callId: 'c2', toolId: 'b', args: {}, preview: {}, risk });
+    const risk = {
+      toolId: 't',
+      category: 'read' as const,
+      estimatedImpact: 'small' as const,
+      touchesSecrets: false,
+      touchesConfig: false,
+      touchesBuild: false,
+    };
+    gate.requestApproval({
+      callId: 'c1',
+      toolId: 'a',
+      args: {},
+      preview: {},
+      risk,
+    });
+    gate.requestApproval({
+      callId: 'c2',
+      toolId: 'b',
+      args: {},
+      preview: {},
+      risk,
+    });
 
     const pending = gate.getPending();
     expect(pending).toHaveLength(2);
-    expect(pending.map(p => p.toolId).sort()).toEqual(['a', 'b']);
+    expect(pending.map((p) => p.toolId).sort()).toEqual(['a', 'b']);
   });
 });
 
@@ -151,10 +212,10 @@ describe('RunManager', () => {
       const record = manager.createRun({ sessionId: 's1', prompt: 'test' });
 
       manager.startRun(record.runId);
-      expect(manager.getRun(record.runId)!.state).toBe('running');
+      expect(manager.getRun(record.runId)?.state).toBe('running');
 
       manager.completeRun(record.runId, 'done');
-      expect(manager.getRun(record.runId)!.state).toBe('completed');
+      expect(manager.getRun(record.runId)?.state).toBe('completed');
     });
 
     it('follows running → paused → running → completed', () => {
@@ -162,25 +223,27 @@ describe('RunManager', () => {
       manager.startRun(record.runId);
 
       manager.pauseRun(record.runId, 'approval-1');
-      expect(manager.getRun(record.runId)!.state).toBe('paused');
+      expect(manager.getRun(record.runId)?.state).toBe('paused');
 
       manager.resumeRun(record.runId);
-      expect(manager.getRun(record.runId)!.state).toBe('running');
+      expect(manager.getRun(record.runId)?.state).toBe('running');
 
       manager.completeRun(record.runId, 'done');
-      expect(manager.getRun(record.runId)!.state).toBe('completed');
+      expect(manager.getRun(record.runId)?.state).toBe('completed');
     });
 
     it('allows transition to failed from any active state', () => {
       const r1 = manager.createRun({ sessionId: 's1', prompt: 'test' });
       manager.startRun(r1.runId);
       manager.failRun(r1.runId, 'boom');
-      expect(manager.getRun(r1.runId)!.state).toBe('failed');
+      expect(manager.getRun(r1.runId)?.state).toBe('failed');
     });
 
     it('rejects invalid transitions', () => {
       const record = manager.createRun({ sessionId: 's1', prompt: 'test' });
-      expect(() => manager.pauseRun(record.runId, 'x')).toThrow('Invalid state transition');
+      expect(() => manager.pauseRun(record.runId, 'x')).toThrow(
+        'Invalid state transition',
+      );
     });
   });
 
@@ -260,7 +323,11 @@ describe('RunManager', () => {
       manager.startRun(record.runId);
 
       manager.emit(record.runId, 'output.delta', { text: 'hello' });
-      manager.emit(record.runId, 'tool.call', { callId: 'c1', toolId: 'repo.read', args: {} });
+      manager.emit(record.runId, 'tool.call', {
+        callId: 'c1',
+        toolId: 'repo.read',
+        args: {},
+      });
 
       const events = store.getByRunId(record.runId);
       expect(events).toHaveLength(3); // started + delta + tool.call
@@ -279,7 +346,7 @@ describe('RunManager', () => {
       manager.incrementStep(record.runId);
       manager.incrementStep(record.runId);
 
-      expect(manager.getRun(record.runId)!.currentStep).toBe(2);
+      expect(manager.getRun(record.runId)?.currentStep).toBe(2);
     });
 
     it('accumulates token usage', () => {
@@ -289,7 +356,9 @@ describe('RunManager', () => {
       manager.addTokenUsage(record.runId, { input: 100, output: 50 });
       manager.addTokenUsage(record.runId, { input: 200, output: 100 });
 
-      const run = manager.getRun(record.runId)!;
+      const run = manager.getRun(record.runId);
+      expect(run).toBeDefined();
+      if (!run) return;
       expect(run.tokenUsage.input).toBe(300);
       expect(run.tokenUsage.output).toBe(150);
     });
