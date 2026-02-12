@@ -19,6 +19,13 @@ Agent OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
 - **Cursor**: Follow `.cursorrules` for coding standards.
 - **Claude Code**: Refer to `CLAUDE.md` for project commands.
 - **Linter**: Run `bun run check` to verify code quality (Biome).
+- **Fixes**: Run `bun run format` to auto-fix formatting, or `bun run lint:fix` to apply safe fixes.
+- **Rules**:
+  - All new code must have valid tests.
+  - All code must pass `bun run check` (Biome linting/formatting).
+  - All code must pass `bun run typecheck` (Strict TypeScript).
+  - The full project must build successfully via `bun run build`.
+  - Commits that fail these checks will be rejected by pre-commit hooks.
 
 ---
 
