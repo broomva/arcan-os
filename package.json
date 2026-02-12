@@ -11,11 +11,15 @@
     "clean": "turbo run clean",
     "check": "biome check .",
     "format": "biome format . --write",
-    "lint:fix": "biome check . --write"
+    "lint:fix": "biome check . --write",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
     "@agent-os/tsconfig": "workspace:*",
     "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.29.8",
     "turbo": "^2.5.0",
     "typescript": "^5.8.0"
   },

@@ -1,0 +1,62 @@
+{
+  "name": "agent-os",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "An event-sourced AI agent runtime. Install everything with a single package.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "agent": "./node_modules/.bin/agent",
+    "agent-os-daemon": "./node_modules/.bin/agent-os-daemon"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "@agent-os/core",
+      "types": "@agent-os/core"
+    },
+    "./memory": {
+      "import": "@agent-os/memory",
+      "types": "@agent-os/memory"
+    },
+    "./engine": {
+      "import": "@agent-os/engine-adapter",
+      "types": "@agent-os/engine-adapter"
+    }
+  },
+  "files": ["dist", "LICENSE"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/broomva/agent-os"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly --outDir dist",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@agent-os/core": "workspace:*",
+    "@agent-os/event-store": "workspace:*",
+    "@agent-os/run-manager": "workspace:*",
+    "@agent-os/tool-kernel": "workspace:*",
+    "@agent-os/engine-adapter": "workspace:*",
+    "@agent-os/memory": "workspace:*",
+    "@agent-os/observability": "workspace:*",
+    "@agent-os/context": "workspace:*",
+    "@agent-os/skills": "workspace:*",
+    "@agent-os/cli": "workspace:*",
+    "@agent-os/daemon": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.8.0",
+    "@agent-os/tsconfig": "workspace:*"
+  }
+}

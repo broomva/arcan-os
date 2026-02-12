@@ -1,10 +1,35 @@
 {
   "name": "@agent-os/memory",
   "version": "1.0.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "LICENSE"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/broomva/agent-os",
+    "directory": "packages/memory"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "test": "bun test"
+    "build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly --outDir dist",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.8.0",
+    "@agent-os/tsconfig": "workspace:*"
   },
   "dependencies": {
     "@agent-os/core": "workspace:*",
@@ -13,10 +38,5 @@
     "ai": "^4.1.17",
     "rxjs": "^7.8.1",
     "zod": "^3.24.1"
-  },
-  "devDependencies": {
-    "bun-types": "latest",
-    "typescript": "^5.8.0",
-    "@agent-os/tsconfig": "workspace:*"
   }
 }

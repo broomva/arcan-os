@@ -1,0 +1,16 @@
+import React from 'react';
+import zod from 'zod';
+import { Dashboard } from '../components/Dashboard/index.js';
+
+export const options = zod.object({
+  id: zod.string().optional().describe('Session ID to resume'),
+});
+
+type Props = {
+  options: zod.infer<typeof options>;
+};
+
+export default function DashboardCommand({ options }: Props) {
+  const sessionId = options.id || crypto.randomUUID();
+  return <Dashboard sessionId={sessionId} />;
+}
