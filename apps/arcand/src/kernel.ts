@@ -1,7 +1,7 @@
 /**
- * @arcan-os/daemon — Kernel Factory
+ * @arcan-os/arcand — Kernel Factory
  *
- * Creates the shared services that power the daemon:
+ * Creates the shared services that power the arcand:
  * EventStore, RunManager, ToolKernel, ContextAssembler, and AiSdkEngine.
  *
  * The kernel is the dependency-injection root — modules receive it
@@ -75,12 +75,12 @@ export interface KernelOptions {
 
 const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-20250514';
 const DEFAULT_PROMPT =
-  'You are Agent OS, a helpful coding assistant with access to file system tools.';
+  'You are Arcan OS, a helpful coding assistant with access to file system tools.';
 
 export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
-  const workspace = opts.workspace ?? env.AGENT_OS_WORKSPACE;
-  const modelSpec = opts.model ?? env.AGENT_OS_MODEL ?? DEFAULT_MODEL;
-  const dbPath = opts.dbPath ?? env.AGENT_OS_DB;
+  const workspace = opts.workspace ?? env.ARCAN_OS_WORKSPACE;
+  const modelSpec = opts.model ?? env.ARCAN_OS_MODEL ?? DEFAULT_MODEL;
+  const dbPath = opts.dbPath ?? env.ARCAN_OS_DB;
   const basePrompt = opts.basePrompt ?? DEFAULT_PROMPT;
 
   // Core services

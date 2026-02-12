@@ -3,10 +3,10 @@ import { z } from 'zod';
 
 export const env = createEnv({
   server: {
-    AGENT_OS_PORT: z.coerce.number().default(4200),
-    AGENT_OS_DB: z.string().default(':memory:'),
-    AGENT_OS_WORKSPACE: z.string().default(process.cwd()),
-    AGENT_OS_MODEL: z.string().optional(),
+    ARCAN_OS_PORT: z.coerce.number().default(4200),
+    ARCAN_OS_DB: z.string().default(':memory:'),
+    ARCAN_OS_WORKSPACE: z.string().default(process.cwd()),
+    ARCAN_OS_MODEL: z.string().optional(),
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),

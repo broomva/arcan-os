@@ -6,7 +6,7 @@
  *
  * This IS the ToolLoopAgent — AI SDK's `maxSteps` drives the multi-step
  * tool loop. The engine:
- *   1. Converts Agent OS tools → AI SDK CoreTools (delegating to ToolKernel)
+ *   1. Converts Arcan OS tools → AI SDK CoreTools (delegating to ToolKernel)
  *   2. Wires `needsApproval` to pause the loop for approval-required tools
  *   3. Iterates `fullStream`, mapping each part to canonical AgentEvents
  *   4. Enables `experimental_telemetry` for OTel/LangSmith observability
@@ -137,7 +137,7 @@ export class AiSdkEngine implements AgentEngine {
       experimental_telemetry: this.telemetryEnabled
         ? {
             isEnabled: true,
-            functionId: `agent-os/run/${sessionId}`,
+            functionId: `arcan-os/run/${sessionId}`,
             metadata: {
               runId,
               sessionId,
@@ -276,7 +276,7 @@ export class AiSdkEngine implements AgentEngine {
   // -----------------------------------------------------------------------
 
   /**
-   * Convert Agent OS tool handlers to AI SDK CoreTool format.
+   * Convert Arcan OS tool handlers to AI SDK CoreTool format.
    * Each tool's execute function delegates to the ToolKernel.
    * Uses AI SDK v6 `tool()` helper for proper type inference
    * and wires `needsApproval` from the ToolKernel policy engine.

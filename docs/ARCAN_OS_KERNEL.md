@@ -1,4 +1,4 @@
-Agent OS — Architectural Definition (Open-Core Kernel + Managed Control Plane)
+Arcan OS — Architectural Definition (Open-Core Kernel + Managed Control Plane)
 
 Goal: define an execution substrate for agentic, AI-native applications where reasoning proposes and the OS executes safely, with policy, approvals, audit, replay, and pluggable runtimes/tools.
 
@@ -8,12 +8,12 @@ This document is written to be a durable reference for design + implementation.
 
 0) North Star
 
-Agent OS is not an “agent framework”.
+Arcan OS is not an “agent framework”.
 It is an execution kernel + control plane that can host any reasoning layer and support arbitrary dynamic systems while remaining safe, observable, and governable.
 
 Core mental model
 	•	Planner / Reasoner (untrusted): produces intent, plans, tool selections, code/artifacts
-	•	Agent OS (trusted): enforces capability policies, schedules work, executes tools in isolation, records immutable evidence, requires approvals, streams events, supports replay
+	•	Arcan OS (trusted): enforces capability policies, schedules work, executes tools in isolation, records immutable evidence, requires approvals, streams events, supports replay
 
 ⸻
 

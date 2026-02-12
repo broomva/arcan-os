@@ -1,6 +1,6 @@
-Agent OS Blueprint — Mastra + Bun + Elysia + skills.sh
+Arcan OS Blueprint — Mastra + Bun + Elysia + skills.sh
 
-This document is the authoritative architectural description of the Agent OS. It is intentionally written as an explanation-first document. You should be able to build the system end‑to‑end from this file without reverse‑engineering bullet lists.
+This document is the authoritative architectural description of the Arcan OS. It is intentionally written as an explanation-first document. You should be able to build the system end‑to‑end from this file without reverse‑engineering bullet lists.
 
 The goal of this system is to support long‑running, file‑based agents with human approvals, replayable execution, and skills.sh‑style procedural skills, while keeping the agent engine (Mastra today) fully replaceable.
 
@@ -18,7 +18,7 @@ Traditional “agent apps” fail when:
 
 This architecture treats an agent run as a durable execution process, not a chat session.
 
-The daemon is the operating system.
+The arcand is the operating system.
 The model is only a reasoning component.
 
 ⸻
@@ -39,7 +39,7 @@ It only requests tools.
 1. System architecture
 
 The system is split into five hard layers:
-	1.	Agent daemon (agentd)
+	1.	Agent arcand (agentd)
 	2.	Run orchestration core
 	3.	Tool kernel
 	4.	Skills layer
@@ -67,7 +67,7 @@ The client calls:
 
 POST /v1/runs
 
-The daemon creates a RunRecord and immediately emits:
+The arcand creates a RunRecord and immediately emits:
 
 run.started
 
@@ -79,7 +79,7 @@ Only one run may execute at a time per session.
 
 2.2 Context assembly
 
-Before the first model call, the daemon builds an execution context.
+Before the first model call, the arcand builds an execution context.
 
 The ContextAssembler loads:
 
@@ -145,7 +145,7 @@ Clients never see engine internals.
 
 2.6 Artifacts
 
-When a meaningful file result is produced (patch, report, log, snapshot), the daemon stores the content in the artifact store and emits:
+When a meaningful file result is produced (patch, report, log, snapshot), the arcand stores the content in the artifact store and emits:
 
 artifact.emitted
 
@@ -155,7 +155,7 @@ Artifacts are content‑addressed and immutable.
 
 2.7 Completion
 
-When the engine finishes, the daemon emits:
+When the engine finishes, the arcand emits:
 
 run.completed
 
@@ -196,7 +196,7 @@ This is deliberately minimal.
 
 4. Persistence and replay
 
-The daemon stores events in SQLite.
+The arcand stores events in SQLite.
 
 The database is append‑only.
 
@@ -256,7 +256,7 @@ They are not tools and they are not workflows.
 
 A skill is a directory containing a SKILL.md file and optional resources.
 
-The daemon maintains a SkillsRegistry that:
+The arcand maintains a SkillsRegistry that:
 
 • scans skill roots
 • indexes metadata
@@ -314,7 +314,7 @@ Resume always reconstructs context and starts a fresh engine invocation.
 
 Elysia is used only as an HTTP/SSE transport layer.
 
-The daemon exposes three mandatory endpoints:
+The arcand exposes three mandatory endpoints:
 
 • POST /v1/runs
 • GET  /v1/runs/:runId/events
@@ -338,7 +338,7 @@ They never influence execution except through commands (run creation and approva
 
 The repository is organised so that no client or engine can bypass the OS core.
 
-apps/daemon contains only orchestration and adapters.
+apps/arcand contains only orchestration and adapters.
 
 packages/core contains only types and shared contracts.
 
@@ -657,7 +657,7 @@ These are safety invariants, not agent logic.
 
 ⸻
 
-47. What makes this an Agent OS (not an agent framework)
+47. What makes this an Arcan OS (not an agent framework)
 
 This system provides:
 

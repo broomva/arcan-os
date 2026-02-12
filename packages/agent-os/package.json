@@ -1,9 +1,13 @@
 {
-  "name": "@arcan-os/arcan-os",
+  "name": "arcan-os",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "An event-sourced AI agent runtime. Install everything with a single package.",
+  "bin": {
+    "arcan": "./bin/arcan.js",
+    "arcand": "./bin/arcand.js"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -27,11 +31,12 @@
   },
   "files": [
     "dist",
+    "bin",
     "LICENSE"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/broomva/agent-os.git"
+    "url": "git+https://github.com/broomva/arcan-os.git"
   },
   "publishConfig": {
     "access": "public"
@@ -53,7 +58,7 @@
     "@arcan-os/context": "workspace:*",
     "@arcan-os/skills": "workspace:*",
     "@arcan-os/cli": "workspace:*",
-    "@arcan-os/daemon": "workspace:*"
+    "@arcan-os/arcand": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest",

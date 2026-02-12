@@ -2,7 +2,7 @@
  * @arcan-os/event-store
  *
  * Append-only SQLite event ledger with snapshot support.
- * This is the single source of truth for all Agent OS state.
+ * This is the single source of truth for all Arcan OS state.
  *
  * Uses Bun's built-in SQLite for zero-dependency persistence.
  * (V1 spec §4)
@@ -291,7 +291,7 @@ export class EventStore {
   // -------------------------------------------------------------------------
 
   /**
-   * Rebuild sequence counters from existing data (for daemon restart).
+   * Rebuild sequence counters from existing data (for arcand restart).
    */
   rebuildSeqCounters(): void {
     const rows = this.db

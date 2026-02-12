@@ -12,7 +12,7 @@ type Props = {
 export default function Index({ options: _options }: Props) {
   return (
     <Box flexDirection="column" padding={1}>
-      <Text color="green">Agent OS CLI</Text>
+      <Text color="green">Arcan OS CLI</Text>
       <Text>Use `agent chat [sessionId]` to start.</Text>
     </Box>
   );

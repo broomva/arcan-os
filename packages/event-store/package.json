@@ -18,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/broomva/agent-os.git",
+    "url": "git+https://github.com/broomva/arcan-os.git",
     "directory": "packages/event-store"
   },
   "publishConfig": {

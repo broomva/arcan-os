@@ -1,8 +1,8 @@
 /**
- * agent-os — Meta-package that re-exports all Agent OS packages.
+ * arcan-os — Meta-package that re-exports all Arcan OS packages.
  *
- * Install with: bun install agent-os
- * This gives you access to all @arcan-os/* packages plus the `agent` CLI command.
+ * Install with: bun install arcan-os
+ * This gives you access to all @arcan-os/* packages plus the `arcan` CLI command.
  */
 
 export * as Context from '@arcan-os/context';

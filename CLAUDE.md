@@ -1,7 +1,7 @@
 # Claude Code Configuration
 
 ## Project Context
-Agent OS is an event-sourced AI agent runtime. It stores agent interactions as an immutable event stream in SQLite.
+Arcan OS is an event-sourced AI agent runtime. It stores agent interactions as an immutable event stream in SQLite.
 
 ## Commands
 

@@ -1,7 +1,7 @@
 /**
  * @arcan-os/observability — OTel Setup
  *
- * Configures OpenTelemetry tracing for Agent OS.
+ * Configures OpenTelemetry tracing for Arcan OS.
  * AI SDK's `experimental_telemetry` emits OTel spans automatically.
  * This module configures the TracerProvider and exporters.
  */
@@ -41,11 +41,11 @@ let _provider: BasicTracerProvider | null = null;
 let _inMemoryExporter: InMemorySpanExporter | null = null;
 
 /**
- * Initialize OTel tracing for Agent OS.
+ * Initialize OTel tracing for Arcan OS.
  * Returns a Tracer that can be passed to AI SDK's `experimental_telemetry`.
  */
 export function setupTelemetry(config: OTelConfig = {}): Tracer {
-  const serviceName = config.serviceName ?? 'agent-os';
+  const serviceName = config.serviceName ?? 'arcan-os';
 
   // Collect exporters
   const exporters: SpanExporter[] = config.exporters ?? [];
@@ -60,7 +60,7 @@ export function setupTelemetry(config: OTelConfig = {}): Tracer {
       exporters.push(new OTLPTraceExporter({ url: config.otlpEndpoint }));
     } catch {
       console.warn(
-        '[agent-os/observability] OTLP exporter not available. Install @opentelemetry/exporter-trace-otlp-http',
+        '[arcan-os/observability] OTLP exporter not available. Install @opentelemetry/exporter-trace-otlp-http',
       );
     }
   }
@@ -131,7 +131,7 @@ function createLangSmithExporter(config: {
     } = require('@opentelemetry/exporter-trace-otlp-http');
 
     const endpoint = config.endpoint ?? 'https://api.smith.langchain.com';
-    const project = config.project ?? 'agent-os';
+    const project = config.project ?? 'arcan-os';
 
     return new OTLPTraceExporter({
       url: `${endpoint}/otel/v1/traces`,
@@ -142,7 +142,7 @@ function createLangSmithExporter(config: {
     });
   } catch {
     console.warn(
-      '[agent-os/observability] LangSmith OTel exporter not available. Install @opentelemetry/exporter-trace-otlp-http',
+      '[arcan-os/observability] LangSmith OTel exporter not available. Install @opentelemetry/exporter-trace-otlp-http',
     );
     return null;
   }

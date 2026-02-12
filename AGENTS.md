@@ -1,18 +1,18 @@
-# AGENTS.md — Agent OS
+# AGENTS.md — Arcan OS
 
 > Context document for AI coding agents working on this codebase.
 > Read this file first before making any changes.
 
 ## Project Overview
 
-Agent OS is a **modular, event-sourced agent runtime** that orchestrates AI coding assistants. It wraps Vercel's AI SDK to provide run management, tool execution with policy enforcement, approval gates, observability, and skills injection — all connected through an append-only event stream.
+Arcan OS is a **modular, event-sourced agent runtime** that orchestrates AI coding assistants. It wraps Vercel's AI SDK to provide run management, tool execution with policy enforcement, approval gates, observability, and skills injection — all connected through an append-only event stream.
 
 **Design philosophy:** The agent's message history IS the application state. Every action produces immutable events; the system's state is a projection of its event log.
 
 ### Key Design Documents
 
-- `docs/AGENT_OS_V1.md` — V1 specification (referenced as "§" sections throughout the code)
-- `docs/AGENT_OS_KERNEL.md` — Kernel architecture overview
+- `docs/ARCAN_OS_V1.md` — V1 specification (referenced as "§" sections throughout the code)
+- `docs/ARCAN_OS_KERNEL.md` — Kernel architecture overview
 - `docs/OPENAI_CODEX_ARCHITECTURE_ANALYSIS.md` — Reference architecture analysis
 
 ### AI Assistant Guidelines
@@ -48,7 +48,7 @@ Agent OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
 ## Monorepo Structure
 
 ```
-agent-os/
+arcan-os/
 ├── packages/
 │   ├── core/              # Shared types — events, run, tools, engine, snapshots
 │   ├── event-store/       # Append-only SQLite ledger + snapshots
@@ -59,7 +59,7 @@ agent-os/
 │   ├── context/           # Context assembler + message history projection
 │   └── observability/     # OTel setup + LangSmith exporter + EventTracer
 ├── apps/
-│   └── daemon/            # Elysia HTTP/SSE server (agentd)
+│   └── arcand/            # Elysia HTTP/SSE server (agentd)
 ├── docs/                  # Design specifications
 ├── turbo.json             # Task pipeline
 ├── tsconfig.json          # Shared TypeScript config
@@ -75,7 +75,7 @@ event-store ← run-manager
   ↑               ↑
 tool-kernel    engine-adapter ← context ← skills
   ↑               ↑               ↑
-  └───────── daemon (integration point) ← observability
+  └───────── arcand (integration point) ← observability
 ```
 
 All packages use `workspace:*` for internal dependencies. The `@arcan-os/core` package is the foundation — every other package depends on it.
@@ -156,8 +156,8 @@ cd packages/skills && bun test
 # Type check
 bun run typecheck
 
-# Dev server (daemon)
-cd apps/daemon && bun run dev
+# Dev server (arcand)
+cd apps/arcand && bun run dev
 
 # Clean build artifacts
 bun run clean
@@ -168,7 +168,7 @@ bun run clean
 - **Test runner:** `bun test` (Bun's built-in test runner)
 - **Test imports:** `import { describe, expect, it } from 'bun:test'`
 - **Test location:** `<package>/test/<name>.test.ts`
-- **E2E tests:** `apps/daemon/test/e2e.test.ts` — exercises the full stack
+- **E2E tests:** `apps/arcand/test/e2e.test.ts` — exercises the full stack
 - **HTTP testing:** Use Elysia's `app.handle(new Request(...))` — no live server needed
 - **Current count:** 108 tests across 8 files, all passing
 
@@ -197,7 +197,7 @@ bun run clean
 1. Create `packages/tool-kernel/src/tools/<tool-name>.ts`
 2. Define a Zod `inputSchema` and an `Output` interface
 3. Export a `ToolHandler` object with `id`, `description`, `inputSchema`, `category`, `execute`
-4. Register in `apps/daemon/src/server.ts` via `toolKernel.register(myTool)`
+4. Register in `apps/arcand/src/server.ts` via `toolKernel.register(myTool)`
 5. Tool IDs follow `domain.action` convention: `repo.read`, `process.run`
 
 ### Adding a New Skill
@@ -218,7 +218,7 @@ Instruction content for the LLM...
 Place in one of these directories (priority order):
 1. `.agent/skills/<skill-name>/SKILL.md` — workspace-local (highest priority)
 2. `.skills/<skill-name>/SKILL.md` — installed via `npx skills add`
-3. `~/.agent-os/skills/<skill-name>/SKILL.md` — global
+3. `~/.arcan-os/skills/<skill-name>/SKILL.md` — global
 
 ---
 
@@ -262,7 +262,7 @@ The system supports two complementary tracing paths:
 
 1. **AI SDK Telemetry** — `experimental_telemetry` on `streamText` emits OTel spans for LLM calls, tool invocations, and streaming. These go directly to any OTel-compatible collector.
 
-2. **EventTracer** — `packages/observability/src/event-tracer.ts` bridges Agent OS events (run lifecycle, tool calls, approvals) to OTel spans for non-AI-SDK activity.
+2. **EventTracer** — `packages/observability/src/event-tracer.ts` bridges Arcan OS events (run lifecycle, tool calls, approvals) to OTel spans for non-AI-SDK activity.
 
 ### LangSmith Setup
 
@@ -272,7 +272,7 @@ LangSmith accepts OTel traces at its OTLP endpoint. Configure via:
 setupTelemetry({
   langsmith: {
     apiKey: process.env.LANGSMITH_API_KEY,
-    project: 'agent-os',
+    project: 'arcan-os',
   },
 });
 ```
@@ -285,7 +285,7 @@ setupTelemetry({
 |---|---|
 | **Event-sourced state** | Agent message history IS the app state. Immutable log enables replay, debugging, auditability |
 | **AI SDK (not Mastra)** | Direct control over the agent loop via `streamText` + `maxSteps`. Mastra adds orchestration overhead we don't need |
-| **SQLite for events** | WAL mode, zero-config, single-file. Perfect for local-first daemon |
+| **SQLite for events** | WAL mode, zero-config, single-file. Perfect for local-first arcand |
 | **Elysia (not Hono)** | Superior Bun integration, built-in type inference, native SSE support |
 | **`provider.getTracer()` over global** | OTel's global `trace` provider can only be set once. Using provider instance directly ensures each setup returns a working tracer |
 | **Skills as SKILL.md** | Compatible with skills.sh ecosystem. Multi-source discovery with priority ordering |
@@ -297,5 +297,5 @@ setupTelemetry({
 - No persistent memory across sessions (working memory is ephemeral)
 - No multi-agent orchestration (single agent per session)
 - Engine adapter has no real LLM integration tests (mocking only)
-- No built-in auth/authz on daemon endpoints
+- No built-in auth/authz on arcand endpoints
 - SQLite limits horizontal scaling (single-writer)

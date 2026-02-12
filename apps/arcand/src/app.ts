@@ -1,5 +1,5 @@
 /**
- * @arcan-os/daemon — App Factory
+ * @arcan-os/arcand — App Factory
  *
  * Composes all Elysia modules into a single app instance.
  * Each module is a self-contained Elysia instance with its own
@@ -28,7 +28,7 @@ export function createApp(kernel: Kernel) {
         provider: 'scalar',
         documentation: {
           info: {
-            title: 'Agent OS',
+            title: 'Arcan OS',
             version: '0.1.0',
             description: 'Event-sourced AI agent runtime API',
           },

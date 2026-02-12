@@ -115,7 +115,7 @@ export function Chat({ sessionId }: ChatProps) {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      // DEFERRED: Send context files natively once daemon RunConfig supports a `context` field
+      // DEFERRED: Send context files natively once arcand RunConfig supports a `context` field
       let prompt = value;
       if (contextFiles.length > 0) {
         prompt += `\n\nContext Files:\n${JSON.stringify(contextFiles)}`;

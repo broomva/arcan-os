@@ -1,6 +1,6 @@
-# Agent OS
+# Arcan OS
 
-**Agent OS** is a modular, event-sourced runtime for AI coding agents. It provides a robust foundation for orchestrating AI assistants, managing their lifecycle, and enforcing safety policies through a strict event-driven architecture.
+**Arcan OS** is a modular, event-sourced runtime for AI coding agents. It provides a robust foundation for orchestrating AI assistants, managing their lifecycle, and enforcing safety policies through a strict event-driven architecture.
 
 ## Features
 
@@ -22,9 +22,9 @@
 ## Project Structure
 
 ```bash
-agent-os/
+arcan-os/
 ├── apps/
-│   └── daemon/            # HTTP/SSE Server & Agent Runtime
+│   └── arcand/            # HTTP/SSE Server & Agent Runtime
 ├── packages/
 │   ├── core/              # Shared domain types & event schemas
 │   ├── tool-kernel/       # Capability registry & policy engine
@@ -52,7 +52,7 @@ bun install
 ### Development
 
 ```bash
-# Start the daemon
+# Start the arcand
 bun run dev
 
 # Run tests

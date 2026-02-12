@@ -1,8 +1,8 @@
-# Cursor Rules for Agent OS
+# Cursor Rules for Arcan OS
 
 ## Project Overview
 
-Agent OS is a modular, event-sourced agent runtime built with:
+Arcan OS is a modular, event-sourced agent runtime built with:
 - **Runtime**: Bun
 - **Language**: TypeScript (Strict Mode)
 - **Monorepo**: Turborepo
@@ -25,7 +25,7 @@ Agent OS is a modular, event-sourced agent runtime built with:
 - **Mocking**: Use `mock()` from `bun:test`.
 
 ### Monorepo Structure
-- **apps/**: Deployable applications (`daemon`).
+- **apps/**: Deployable applications (`arcand`).
 - **packages/**: Shared logic (`core`, `event-store`, `tool-kernel`).
 - **Tools**: Dependencies can be `workspace:*`.
 

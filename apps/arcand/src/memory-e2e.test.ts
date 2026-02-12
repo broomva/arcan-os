@@ -8,7 +8,7 @@ const MOCK_MODEL = 'openai/gpt-4o';
 describe('Observational Memory E2E', () => {
   let kernel: Awaited<ReturnType<typeof createKernel>>;
   const sessionId = generateId();
-  const workspace = '/tmp/agent-os-test-memory';
+  const workspace = '/tmp/arcan-os-test-memory';
 
   beforeAll(async () => {
     kernel = await createKernel({

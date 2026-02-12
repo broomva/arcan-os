@@ -1,5 +1,5 @@
 {
-  "name": "agent-os",
+  "name": "arcan-os",
   "private": true,
   "workspaces": [
     "apps/*",

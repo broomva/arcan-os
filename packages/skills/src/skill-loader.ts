@@ -7,7 +7,7 @@
  * Discovery paths (searched in order):
  *   1. Workspace-local: {workspace}/.agent/skills/SKILL.md
  *   2. skills.sh installed: {workspace}/.skills/SKILL.md
- *   3. Global: ~/.agent-os/skills/SKILL.md
+ *   3. Global: ~/.arcan-os/skills/SKILL.md
  */
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -61,7 +61,7 @@ export function loadSkills(opts: SkillLoadOptions): Skill[] {
   const paths: Array<{ dir: string; source: Skill['source'] }> = [
     { dir: join(opts.workspace, '.agent', 'skills'), source: 'workspace' },
     { dir: join(opts.workspace, '.skills'), source: 'installed' },
-    { dir: join(homeDir, '.agent-os', 'skills'), source: 'global' },
+    { dir: join(homeDir, '.arcan-os', 'skills'), source: 'global' },
     ...(opts.additionalPaths ?? []).map((p) => ({
       dir: resolve(p),
       source: 'workspace' as const,

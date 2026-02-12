@@ -1,11 +1,11 @@
 {
-  "name": "@arcan-os/daemon",
+  "name": "@arcan-os/arcand",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.js",
   "bin": {
-    "agent-os-daemon": "./dist/index.js"
+    "arcand": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -18,8 +18,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/broomva/agent-os.git",
-    "directory": "apps/daemon"
+    "url": "git+https://github.com/broomva/arcan-os.git",
+    "directory": "apps/arcand"
   },
   "publishConfig": {
     "access": "public"

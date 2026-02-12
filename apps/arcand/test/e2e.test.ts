@@ -1,10 +1,10 @@
 /**
- * Agent OS — E2E Integration Tests
+ * Arcan OS — E2E Integration Tests
  *
  * Exercises the full stack: EventStore → RunManager → ToolKernel →
  * ContextAssembler → SkillRegistry → Observability → Daemon HTTP/SSE.
  *
- * Uses Elysia's app.handle() for HTTP tests (same pattern as daemon.test.ts).
+ * Uses Elysia's app.handle() for HTTP tests (same pattern as arcand.test.ts).
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
@@ -290,7 +290,7 @@ describe('E2E: Skills + Context Assembly', () => {
     expect(registry.get('typescript-guide')).toBeDefined();
 
     const assembler = new ContextAssembler({
-      basePrompt: 'You are Agent OS, a helpful coding assistant.',
+      basePrompt: 'You are Arcan OS, a helpful coding assistant.',
       skillRegistry: registry,
       workspace: TEST_WORKSPACE,
     });
@@ -305,7 +305,7 @@ describe('E2E: Skills + Context Assembly', () => {
       tools: [],
     });
 
-    expect(request.systemPrompt).toContain('You are Agent OS');
+    expect(request.systemPrompt).toContain('You are Arcan OS');
     expect(request.systemPrompt).toContain('## Workspace');
     expect(request.systemPrompt).toContain('## Active Skills');
     expect(request.systemPrompt).toContain('<skill name="typescript-guide">');
@@ -404,7 +404,7 @@ describe('E2E: Observability Event Tracing', () => {
   });
 
   it('traces a complete run lifecycle through OTel spans', () => {
-    const tracer = setupTelemetry({ serviceName: 'agent-os-e2e' });
+    const tracer = setupTelemetry({ serviceName: 'arcan-os-e2e' });
     const eventTracer = new EventTracer(tracer);
     const runId = 'e2e-run-1';
 

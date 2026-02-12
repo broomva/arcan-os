@@ -76,7 +76,7 @@ export class ApprovalGate {
 
   /**
    * Resolve a pending approval.
-   * Called by the daemon when the user approves/denies via HTTP.
+   * Called by the arcand when the user approves/denies via HTTP.
    */
   resolveApproval(approvalId: string, decision: ApprovalDecision): void {
     const entry = this.pending.get(approvalId);

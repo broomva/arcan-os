@@ -66,7 +66,7 @@ Deploy with Vercel.
   );
 
   // Global skills
-  const globalDir = join(TEST_DIR, '__global__', '.agent-os', 'skills');
+  const globalDir = join(TEST_DIR, '__global__', '.arcan-os', 'skills');
   createSkill(
     globalDir,
     'testing',
@@ -184,7 +184,7 @@ describe('loadSkills', () => {
 
   it('returns empty array for nonexistent workspace', () => {
     const skills = loadSkills({
-      workspace: '/tmp/nonexistent-agent-os-test',
+      workspace: '/tmp/nonexistent-arcan-os-test',
       homeDir: '/tmp/nonexistent-global',
     });
     expect(skills).toEqual([]);

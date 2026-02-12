@@ -315,7 +315,7 @@ describe('EventStore', () => {
         payload: {},
       });
 
-      // Simulate daemon restart — create new store on same db wouldn't
+      // Simulate arcand restart — create new store on same db wouldn't
       // work with :memory:, so we test the method directly
       store.rebuildSeqCounters();
 

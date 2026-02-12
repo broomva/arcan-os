@@ -1,8 +1,8 @@
 /**
  * @arcan-os/core
  *
- * Shared types, interfaces, and enums for Agent OS.
- * This package has no runtime dependencies on any other Agent OS package.
+ * Shared types, interfaces, and enums for Arcan OS.
+ * This package has no runtime dependencies on any other Arcan OS package.
  */
 
 // Engine — adapter interface

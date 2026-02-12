@@ -23,7 +23,7 @@ async function main() {
   console.log(`Session ID: ${sessionId}`);
 
   // 3. Send request
-  const prompt = `Create a file named "${TARGET_FILE}" with the content "Hello Agent OS E2E".`;
+  const prompt = `Create a file named "${TARGET_FILE}" with the content "Hello Arcan OS E2E".`;
   console.log(`Prompt: ${prompt}`);
   let runId: string | undefined;
   try {
@@ -80,7 +80,7 @@ async function main() {
 
   if (existsSync(TARGET_PATH)) {
     const content = readFileSync(TARGET_PATH, 'utf-8');
-    if (content.includes('Hello Agent OS E2E')) {
+    if (content.includes('Hello Arcan OS E2E')) {
       console.log('SUCCESS: File created with correct content.');
       // cleanup
       unlinkSync(TARGET_PATH);

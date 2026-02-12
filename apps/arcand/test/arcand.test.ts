@@ -1,7 +1,7 @@
 /**
- * @arcan-os/daemon — Integration tests
+ * @arcan-os/arcand — Integration tests
  *
- * Tests the daemon HTTP API endpoints without an LLM.
+ * Tests the arcand HTTP API endpoints without an LLM.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';

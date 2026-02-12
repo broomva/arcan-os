@@ -1,7 +1,7 @@
 /**
  * @arcan-os/observability — Event Tracer
  *
- * Bridges Agent OS events to OTel spans for non-AI-SDK activity.
+ * Bridges Arcan OS events to OTel spans for non-AI-SDK activity.
  * Covers: tool execution timing, approval wait time, run lifecycle.
  */
 
@@ -23,7 +23,7 @@ export class EventTracer {
   private activeSpans = new Map<string, Span>();
 
   constructor(tracer?: Tracer) {
-    this.tracer = tracer ?? trace.getTracer('agent-os-events');
+    this.tracer = tracer ?? trace.getTracer('arcan-os-events');
   }
 
   /**
@@ -33,9 +33,9 @@ export class EventTracer {
     switch (event.type) {
       case 'run.started':
         this.startSpan(`run:${event.runId}`, {
-          'agent-os.run_id': event.runId,
-          'agent-os.session_id': event.sessionId,
-          'agent-os.event_type': event.type,
+          'arcan-os.run_id': event.runId,
+          'arcan-os.session_id': event.sessionId,
+          'arcan-os.event_type': event.type,
         });
         break;
 
@@ -52,9 +52,9 @@ export class EventTracer {
       case 'tool.call': {
         const payload = event.payload as { callId: string; toolId: string };
         this.startSpan(`tool:${payload.callId}`, {
-          'agent-os.tool_id': payload.toolId,
-          'agent-os.call_id': payload.callId,
-          'agent-os.run_id': event.runId,
+          'arcan-os.tool_id': payload.toolId,
+          'arcan-os.call_id': payload.callId,
+          'arcan-os.run_id': event.runId,
         });
         break;
       }
@@ -67,7 +67,7 @@ export class EventTracer {
         };
         this.endSpan(`tool:${payload.callId}`, {
           attributes: {
-            'agent-os.tool_duration_ms': payload.durationMs,
+            'arcan-os.tool_duration_ms': payload.durationMs,
           },
         });
         break;
@@ -76,9 +76,9 @@ export class EventTracer {
       case 'approval.requested': {
         const payload = event.payload as { approvalId: string; toolId: string };
         this.startSpan(`approval:${payload.approvalId}`, {
-          'agent-os.approval_id': payload.approvalId,
-          'agent-os.tool_id': payload.toolId,
-          'agent-os.run_id': event.runId,
+          'arcan-os.approval_id': payload.approvalId,
+          'arcan-os.tool_id': payload.toolId,
+          'arcan-os.run_id': event.runId,
         });
         break;
       }
@@ -90,7 +90,7 @@ export class EventTracer {
         };
         this.endSpan(`approval:${payload.approvalId}`, {
           attributes: {
-            'agent-os.approval_decision': payload.decision,
+            'arcan-os.approval_decision': payload.decision,
           },
         });
         break;
@@ -101,8 +101,8 @@ export class EventTracer {
         const runSpan = this.activeSpans.get(`run:${event.runId}`);
         if (runSpan) {
           runSpan.addEvent(event.type, {
-            'agent-os.seq': event.seq,
-            'agent-os.event_id': event.eventId,
+            'arcan-os.seq': event.seq,
+            'arcan-os.event_id': event.eventId,
           });
         }
         break;
