@@ -28,7 +28,14 @@ import type {
 } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 import type { ToolKernel } from '@agent-os/tool-kernel';
-import { stepCountIs, streamText, type ToolSet, tool } from 'ai';
+import {
+  type ModelMessage,
+  stepCountIs,
+  streamText,
+  type TextStreamPart,
+  type ToolSet,
+  tool,
+} from 'ai';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -119,7 +126,7 @@ export class AiSdkEngine implements AgentEngine {
     const result = streamText({
       model: this.model,
       system: req.systemPrompt,
-      messages: messages as import('ai').ModelMessage[],
+      messages,
       tools,
       stopWhen: stepCountIs(this.maxSteps),
 
@@ -141,10 +148,9 @@ export class AiSdkEngine implements AgentEngine {
         : undefined,
     });
 
-    // Process fullStream — map each AI SDK part to a canonical AgentEvent
-    for await (const part of result.fullStream) {
-      // biome-ignore lint/suspicious/noExplicitAny: AI SDK stream parts have a complex union type
-      const p = part as any;
+    // Process fullStream — map each AI SDK v6 TextStreamPart to a canonical AgentEvent
+    const stream: AsyncIterable<TextStreamPart<ToolSet>> = result.fullStream;
+    for await (const p of stream) {
       switch (p.type) {
         // ----- Text output -----
         case 'text-delta':
@@ -166,7 +172,7 @@ export class AiSdkEngine implements AgentEngine {
           yield makeEvent<ToolCallPayload>('tool.call', {
             callId: p.toolCallId,
             toolId: p.toolName,
-            args: p.input ?? {},
+            args: (p.input ?? {}) as Record<string, unknown>,
           });
           break;
 
@@ -194,12 +200,12 @@ export class AiSdkEngine implements AgentEngine {
         case 'tool-approval-request':
           yield makeEvent<ApprovalRequestedPayload>('approval.requested', {
             approvalId: p.approvalId,
-            callId: p.toolCall?.toolCallId ?? p.approvalId,
-            toolId: p.toolCall?.toolName ?? 'unknown',
-            args: p.toolCall?.input ?? {},
+            callId: p.toolCall.toolCallId,
+            toolId: p.toolCall.toolName,
+            args: (p.toolCall.input ?? {}) as Record<string, unknown>,
             preview: {},
             risk: {
-              toolId: p.toolCall?.toolName ?? 'unknown',
+              toolId: p.toolCall.toolName,
               category: 'exec',
               estimatedImpact: 'medium',
               touchesSecrets: false,
@@ -261,10 +267,6 @@ export class AiSdkEngine implements AgentEngine {
         case 'error':
           console.error('[AiSdkEngine] Stream error:', p.error);
           break;
-
-        default:
-          console.error(`[AiSdkEngine] Unknown part type: ${p.type}`);
-          break;
       }
     }
   }
@@ -318,18 +320,36 @@ export class AiSdkEngine implements AgentEngine {
   }
 
   /**
-   * Convert EngineMessages to AI SDK message format.
+   * Convert EngineMessages to AI SDK v6 ModelMessage format.
    */
-  private buildMessages(
-    req: EngineRunRequest,
-  ): Array<{ role: string; content: string }> {
-    const messages: Array<{ role: string; content: string }> = [];
+  private buildMessages(req: EngineRunRequest): ModelMessage[] {
+    const messages: ModelMessage[] = [];
 
     for (const msg of req.messages) {
-      messages.push({
-        role: msg.role,
-        content: msg.content,
-      });
+      switch (msg.role) {
+        case 'system':
+          messages.push({ role: 'system', content: msg.content });
+          break;
+        case 'user':
+          messages.push({ role: 'user', content: msg.content });
+          break;
+        case 'assistant':
+          messages.push({ role: 'assistant', content: msg.content });
+          break;
+        case 'tool':
+          messages.push({
+            role: 'tool',
+            content: [
+              {
+                type: 'tool-result',
+                toolCallId: msg.toolCallId ?? '',
+                toolName: msg.toolName ?? '',
+                output: { type: 'text', value: msg.content },
+              },
+            ],
+          });
+          break;
+      }
     }
 
     messages.push({

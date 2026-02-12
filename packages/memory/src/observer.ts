@@ -1,4 +1,12 @@
-import type { AgentEvent, Observation } from '@agent-os/core';
+import type {
+  AgentEvent,
+  Observation,
+  OutputMessagePayload,
+  RunFailedPayload,
+  RunStartedPayload,
+  ToolCallPayload,
+  ToolResultPayload,
+} from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 import type { LanguageModel } from 'ai';
 import { generateText, tool } from 'ai';
@@ -79,37 +87,40 @@ ${transcript}`,
     // Simple projection
     // We assume events are sorted by seq
     for (const event of events) {
-      if (event.type === 'run.started') {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload
-        const p = event.payload as any;
-        transcript += `[SYSTEM] Run started. Prompt: "${p.prompt}"\n`;
-      } else if (event.type === 'output.message') {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload
-        const p = event.payload as any;
-        transcript += `[AGENT] ${p.content}\n`;
-      } else if (event.type === 'output.delta') {
-        // Skip deltas in favor of full messages if available, or accumulate them
-        // For simplistic memory, we might just look at tool calls/results and initial prompts
-        // If we only have deltas, we might miss the full text unless we reassemble.
-        // Let's assume for now we mainly care about inputs and tool I/O
-      } else if (event.type === 'tool.call') {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload
-        const p = event.payload as any;
-        transcript += `[TOOL_CALL] ${p.toolId} args=${JSON.stringify(p.args)}\n`;
-      } else if (event.type === 'tool.result') {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload
-        const p = event.payload as any;
-        // Truncate large results
-        let resultStr = JSON.stringify(p.result);
-        if (resultStr.length > 500)
-          resultStr = `${resultStr.slice(0, 500)}... (truncated)`;
-        transcript += `[TOOL_RESULT] ${resultStr}\n`;
-      } else if (event.type === 'run.completed') {
-        transcript += '[SYSTEM] Run completed.\n';
-      } else if (event.type === 'run.failed') {
-        // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload
-        const p = event.payload as any;
-        transcript += `[SYSTEM] Run failed: ${p.error}\n`;
+      switch (event.type) {
+        case 'run.started': {
+          const p = event.payload as RunStartedPayload;
+          transcript += `[SYSTEM] Run started. Prompt: "${p.prompt}"\n`;
+          break;
+        }
+        case 'output.message': {
+          const p = event.payload as OutputMessagePayload;
+          transcript += `[AGENT] ${p.content}\n`;
+          break;
+        }
+        case 'tool.call': {
+          const p = event.payload as ToolCallPayload;
+          transcript += `[TOOL_CALL] ${p.toolId} args=${JSON.stringify(p.args)}\n`;
+          break;
+        }
+        case 'tool.result': {
+          const p = event.payload as ToolResultPayload;
+          let resultStr = JSON.stringify(p.result);
+          if (resultStr.length > 500)
+            resultStr = `${resultStr.slice(0, 500)}... (truncated)`;
+          transcript += `[TOOL_RESULT] ${resultStr}\n`;
+          break;
+        }
+        case 'run.completed':
+          transcript += '[SYSTEM] Run completed.\n';
+          break;
+        case 'run.failed': {
+          const p = event.payload as RunFailedPayload;
+          transcript += `[SYSTEM] Run failed: ${p.error}\n`;
+          break;
+        }
+        default:
+          break;
       }
     }
     return transcript;
