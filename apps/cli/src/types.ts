@@ -1,4 +1,8 @@
-import type { ToolCallPayload, ToolResultPayload, ApprovalRequestedPayload } from '@agent-os/core';
+import type {
+  ApprovalRequestedPayload,
+  ToolCallPayload,
+  ToolResultPayload,
+} from '@agent-os/core';
 
 export interface UIMessage {
   id: string;
@@ -10,4 +14,3 @@ export interface UIMessage {
   isApproval?: boolean;
   approval?: ApprovalRequestedPayload;
 }
-
