@@ -1,5 +1,5 @@
 /**
- * @agent-os/skills — Skill Loader
+ * @arcan-os/skills — Skill Loader
  *
  * Discovers and loads SKILL.md files from multiple paths.
  * Compatible with skills.sh (https://skills.sh/) format.

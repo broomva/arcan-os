@@ -1,10 +1,10 @@
 /**
- * @agent-os/run-manager — Tests
+ * @arcan-os/run-manager — Tests
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
-import type { AgentEvent } from '@agent-os/core';
-import { EventStore } from '@agent-os/event-store';
+import type { AgentEvent } from '@arcan-os/core';
+import { EventStore } from '@arcan-os/event-store';
 import { ApprovalGate } from '../src/approval-gate.js';
 import { RunManager } from '../src/run-manager.js';
 

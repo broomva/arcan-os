@@ -1,5 +1,5 @@
 /**
- * @agent-os/engine-adapter
+ * @arcan-os/engine-adapter
  */
 
 export type { AiSdkEngineConfig } from './ai-sdk-engine.js';

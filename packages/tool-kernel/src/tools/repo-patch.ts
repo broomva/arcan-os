@@ -5,7 +5,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import type { ToolContext, ToolHandler } from '@agent-os/core';
+import type { ToolContext, ToolHandler } from '@arcan-os/core';
 import { z } from 'zod';
 
 export const inputSchema = z.object({

@@ -1,5 +1,5 @@
 /**
- * @agent-os/event-store
+ * @arcan-os/event-store
  *
  * Append-only SQLite event ledger with snapshot support.
  * This is the single source of truth for all Agent OS state.
@@ -9,8 +9,8 @@
  */
 
 import { Database } from 'bun:sqlite';
-import type { AgentEvent, AgentEventType, Snapshot } from '@agent-os/core';
-import { generateId, now } from '@agent-os/core';
+import type { AgentEvent, AgentEventType, Snapshot } from '@arcan-os/core';
+import { generateId, now } from '@arcan-os/core';
 
 // ---------------------------------------------------------------------------
 // Query interfaces

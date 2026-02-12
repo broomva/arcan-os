@@ -1,5 +1,5 @@
 /**
- * @agent-os/event-store
+ * @arcan-os/event-store
  */
 
 export type { EventQuery, SnapshotQuery } from './event-store.js';

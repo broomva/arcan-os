@@ -1,4 +1,4 @@
-import type { ToolCallPayload, ToolResultPayload } from '@agent-os/core';
+import type { ToolCallPayload, ToolResultPayload } from '@arcan-os/core';
 import { Box, Text } from 'ink';
 import { useState } from 'react';
 

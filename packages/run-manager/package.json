@@ -1,5 +1,5 @@
 {
-  "name": "@agent-os/run-manager",
+  "name": "@arcan-os/run-manager",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
@@ -34,10 +34,10 @@
   "devDependencies": {
     "bun-types": "latest",
     "typescript": "^5.9.3",
-    "@agent-os/tsconfig": "workspace:*"
+    "@arcan-os/tsconfig": "workspace:*"
   },
   "dependencies": {
-    "@agent-os/core": "workspace:*",
-    "@agent-os/event-store": "workspace:*"
+    "@arcan-os/core": "workspace:*",
+    "@arcan-os/event-store": "workspace:*"
   }
 }

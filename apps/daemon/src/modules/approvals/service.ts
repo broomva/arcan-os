@@ -2,7 +2,7 @@
  * Approvals module — Service (business logic)
  */
 
-import type { ApprovalGate } from '@agent-os/run-manager';
+import type { ApprovalGate } from '@arcan-os/run-manager';
 
 export const ApprovalService = {
   /**

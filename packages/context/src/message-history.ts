@@ -1,11 +1,11 @@
 /**
- * @agent-os/context — Message History
+ * @arcan-os/context — Message History
  *
  * Projects event stream into conversation messages for the engine.
  * Converts AgentEvents → EngineMessage[] for the LLM.
  */
 
-import type { AgentEvent, EngineMessage } from '@agent-os/core';
+import type { AgentEvent, EngineMessage } from '@arcan-os/core';
 
 // ---------------------------------------------------------------------------
 // Message History Projection

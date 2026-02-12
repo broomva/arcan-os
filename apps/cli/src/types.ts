@@ -2,7 +2,7 @@ import type {
   ApprovalRequestedPayload,
   ToolCallPayload,
   ToolResultPayload,
-} from '@agent-os/core';
+} from '@arcan-os/core';
 
 export interface UIMessage {
   id: string;

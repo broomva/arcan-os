@@ -1,13 +1,13 @@
 /**
- * @agent-os/run-manager — Approval Gate
+ * @arcan-os/run-manager — Approval Gate
  *
  * Manages pending approvals as deferred promises.
  * When a tool requires approval, the gate creates a pending entry
  * and the run pauses until resolved via the HTTP API.
  */
 
-import type { RiskProfile } from '@agent-os/core';
-import { generateId } from '@agent-os/core';
+import type { RiskProfile } from '@arcan-os/core';
+import { generateId } from '@arcan-os/core';
 
 // ---------------------------------------------------------------------------
 // Types

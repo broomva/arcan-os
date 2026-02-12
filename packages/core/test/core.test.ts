@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Tests
+ * @arcan-os/core — Tests
  */
 
 import { describe, expect, it } from 'bun:test';

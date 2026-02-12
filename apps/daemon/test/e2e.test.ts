@@ -10,21 +10,21 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ContextAssembler, projectMessages } from '@agent-os/context';
+import { ContextAssembler, projectMessages } from '@arcan-os/context';
 // Core types
-import type { AgentEvent } from '@agent-os/core';
-import { now } from '@agent-os/core';
+import type { AgentEvent } from '@arcan-os/core';
+import { now } from '@arcan-os/core';
 // Observability
 // Note: We need to mock telemetry for tests or rely on what's available
-// Since setupTelemetry is exported by @agent-os/observability, we can use it.
+// Since setupTelemetry is exported by @arcan-os/observability, we can use it.
 import {
   EventTracer,
   getInMemoryExporter,
   setupTelemetry,
   shutdownTelemetry,
-} from '@agent-os/observability';
+} from '@arcan-os/observability';
 // Skills + Context
-import { SkillRegistry } from '@agent-os/skills';
+import { SkillRegistry } from '@arcan-os/skills';
 import { createApp } from '../src/app';
 import type { Kernel } from '../src/kernel';
 // Daemon — import from the same package's src

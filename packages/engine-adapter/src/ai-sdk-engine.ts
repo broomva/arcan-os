@@ -1,8 +1,8 @@
 /**
- * @agent-os/engine-adapter — AI SDK Engine
+ * @arcan-os/engine-adapter — AI SDK Engine
  *
  * Wraps the Vercel AI SDK streamText to produce canonical AgentEvents.
- * Implements the AgentEngine interface from @agent-os/core.
+ * Implements the AgentEngine interface from @arcan-os/core.
  *
  * This IS the ToolLoopAgent — AI SDK's `maxSteps` drives the multi-step
  * tool loop. The engine:
@@ -25,9 +25,9 @@ import type {
   OutputMessagePayload,
   ToolCallPayload,
   ToolResultPayload,
-} from '@agent-os/core';
-import { generateId, now } from '@agent-os/core';
-import type { ToolKernel } from '@agent-os/tool-kernel';
+} from '@arcan-os/core';
+import { generateId, now } from '@arcan-os/core';
+import type { ToolKernel } from '@arcan-os/tool-kernel';
 import {
   type ModelMessage,
   stepCountIs,
@@ -282,7 +282,7 @@ export class AiSdkEngine implements AgentEngine {
    * and wires `needsApproval` from the ToolKernel policy engine.
    */
   private buildTools(
-    tools: import('@agent-os/core').ToolHandler[],
+    tools: import('@arcan-os/core').ToolHandler[],
     runId: string,
     sessionId: string,
     workspace?: string,

@@ -1,5 +1,5 @@
 /**
- * @agent-os/run-manager — Run Manager
+ * @arcan-os/run-manager — Run Manager
  *
  * Owns the run lifecycle state machine.
  * Coordinates the engine adapter, tool kernel, event store, and approval gate.
@@ -16,9 +16,9 @@ import type {
   RunResumedPayload,
   RunStartedPayload,
   RunState,
-} from '@agent-os/core';
-import { generateId, now } from '@agent-os/core';
-import type { EventStore } from '@agent-os/event-store';
+} from '@arcan-os/core';
+import { generateId, now } from '@arcan-os/core';
+import type { EventStore } from '@arcan-os/event-store';
 import { ApprovalGate } from './approval-gate.js';
 
 // ---------------------------------------------------------------------------

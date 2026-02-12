@@ -1,5 +1,5 @@
 /**
- * @agent-os/daemon — Kernel Factory
+ * @arcan-os/daemon — Kernel Factory
  *
  * Creates the shared services that power the daemon:
  * EventStore, RunManager, ToolKernel, ContextAssembler, and AiSdkEngine.
@@ -8,19 +8,19 @@
  * via Elysia's `decorate` and destructure only what they need.
  */
 
-import { ContextAssembler } from '@agent-os/context';
-import { AiSdkEngine } from '@agent-os/engine-adapter';
-import { EventStore } from '@agent-os/event-store';
-import { MemoryService } from '@agent-os/memory';
-import { RunManager } from '@agent-os/run-manager';
-import { SkillRegistry } from '@agent-os/skills';
+import { ContextAssembler } from '@arcan-os/context';
+import { AiSdkEngine } from '@arcan-os/engine-adapter';
+import { EventStore } from '@arcan-os/event-store';
+import { MemoryService } from '@arcan-os/memory';
+import { RunManager } from '@arcan-os/run-manager';
+import { SkillRegistry } from '@arcan-os/skills';
 import {
   processRun,
   repoPatch,
   repoRead,
   repoSearch,
   ToolKernel,
-} from '@agent-os/tool-kernel';
+} from '@arcan-os/tool-kernel';
 import { env } from './env';
 
 // ---------------------------------------------------------------------------

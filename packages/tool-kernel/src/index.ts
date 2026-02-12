@@ -1,5 +1,5 @@
 /**
- * @agent-os/tool-kernel
+ * @arcan-os/tool-kernel
  */
 
 export { PolicyEngine } from './policy-engine.js';

@@ -6,8 +6,8 @@ import type {
   RunStartedPayload,
   ToolCallPayload,
   ToolResultPayload,
-} from '@agent-os/core';
-import { generateId, now } from '@agent-os/core';
+} from '@arcan-os/core';
+import { generateId, now } from '@arcan-os/core';
 import type { LanguageModel } from 'ai';
 import { generateText, tool } from 'ai';
 import { z } from 'zod';

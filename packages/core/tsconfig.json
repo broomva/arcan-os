@@ -1,5 +1,5 @@
 {
-  "extends": "@agent-os/tsconfig/base.json",
+  "extends": "@arcan-os/tsconfig/base.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"

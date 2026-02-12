@@ -1,5 +1,5 @@
 /**
- * @agent-os/memory
+ * @arcan-os/memory
  *
  * Observational Memory system (Observer/Reflector).
  */

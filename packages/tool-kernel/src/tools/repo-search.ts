@@ -3,7 +3,7 @@
  * (V1 spec §37: repo.search(query, globs?))
  */
 
-import type { ToolContext, ToolHandler } from '@agent-os/core';
+import type { ToolContext, ToolHandler } from '@arcan-os/core';
 import { z } from 'zod';
 
 export const inputSchema = z.object({

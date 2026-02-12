@@ -1,5 +1,5 @@
 /**
- * @agent-os/skills
+ * @arcan-os/skills
  */
 
 export {

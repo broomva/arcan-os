@@ -2,8 +2,8 @@
  * Sessions module — Service (business logic)
  */
 
-import type { EventStore } from '@agent-os/event-store';
-import type { RunManager } from '@agent-os/run-manager';
+import type { EventStore } from '@arcan-os/event-store';
+import type { RunManager } from '@arcan-os/run-manager';
 
 export const SessionService = {
   /**

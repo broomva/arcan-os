@@ -1,5 +1,5 @@
 /**
- * @agent-os/run-manager
+ * @arcan-os/run-manager
  */
 
 export type { ApprovalDecision, PendingApproval } from './approval-gate.js';

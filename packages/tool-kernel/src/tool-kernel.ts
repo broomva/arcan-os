@@ -1,5 +1,5 @@
 /**
- * @agent-os/tool-kernel — Tool Kernel
+ * @arcan-os/tool-kernel — Tool Kernel
  *
  * Tool registration, risk assessment, workspace jail enforcement,
  * and tool execution with policy-driven control paths.
@@ -12,7 +12,7 @@ import type {
   RiskProfile,
   ToolContext,
   ToolHandler,
-} from '@agent-os/core';
+} from '@arcan-os/core';
 import { PolicyEngine } from './policy-engine.js';
 
 // ---------------------------------------------------------------------------

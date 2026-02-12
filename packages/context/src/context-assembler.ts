@@ -1,5 +1,5 @@
 /**
- * @agent-os/context — Context Assembler
+ * @arcan-os/context — Context Assembler
  *
  * Assembles the system prompt and messages for an EngineRunRequest.
  * Merges: base prompt + skills + workspace info.
@@ -11,9 +11,9 @@ import type {
   RunConfig,
   SessionSnapshotData,
   ToolHandler,
-} from '@agent-os/core';
-import type { SkillRegistry } from '@agent-os/skills';
-import { injectSkills } from '@agent-os/skills';
+} from '@arcan-os/core';
+import type { SkillRegistry } from '@arcan-os/skills';
+import { injectSkills } from '@arcan-os/skills';
 
 // ---------------------------------------------------------------------------
 // Types

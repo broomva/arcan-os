@@ -1,6 +1,6 @@
-import type { SessionSnapshotData } from '@agent-os/core';
-import type { EventStore } from '@agent-os/event-store';
-import type { RunManager } from '@agent-os/run-manager';
+import type { SessionSnapshotData } from '@arcan-os/core';
+import type { EventStore } from '@arcan-os/event-store';
+import type { RunManager } from '@arcan-os/run-manager';
 import type { LanguageModel } from 'ai';
 import { Observer } from './observer.js';
 import { Reflector } from './reflector.js';

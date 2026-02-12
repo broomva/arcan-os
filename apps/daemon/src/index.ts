@@ -1,5 +1,5 @@
 /**
- * @agent-os/daemon — Entry point
+ * @arcan-os/daemon — Entry point
  */
 
 import { createApp } from './app';

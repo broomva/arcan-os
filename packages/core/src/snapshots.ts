@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Snapshot types
+ * @arcan-os/core — Snapshot types
  *
  * Materialized projections of the event stream.
  * Snapshots are performance caches — never the source of truth.

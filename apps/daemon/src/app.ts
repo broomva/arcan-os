@@ -1,5 +1,5 @@
 /**
- * @agent-os/daemon — App Factory
+ * @arcan-os/daemon — App Factory
  *
  * Composes all Elysia modules into a single app instance.
  * Each module is a self-contained Elysia instance with its own
@@ -14,7 +14,7 @@ import { approvals } from './modules/approvals';
 // Modules
 import { health } from './modules/health';
 import { runs } from './modules/runs';
-import { sessions } from './modules/sessions';
+import { sessions, sessionsList } from './modules/sessions';
 
 // ---------------------------------------------------------------------------
 // App factory
@@ -47,5 +47,6 @@ export function createApp(kernel: Kernel) {
     })
     .use(runs(kernel))
     .use(approvals(kernel))
+    .use(sessionsList(kernel))
     .use(sessions(kernel));
 }

@@ -1,5 +1,5 @@
 /**
- * @agent-os/tool-kernel — Tests
+ * @arcan-os/tool-kernel — Tests
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';

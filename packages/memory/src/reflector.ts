@@ -1,5 +1,5 @@
-import type { Observation, Reflection } from '@agent-os/core';
-import { generateId, now } from '@agent-os/core';
+import type { Observation, Reflection } from '@arcan-os/core';
+import { generateId, now } from '@arcan-os/core';
 import type { LanguageModel } from 'ai';
 import { generateText, tool } from 'ai';
 import { z } from 'zod';

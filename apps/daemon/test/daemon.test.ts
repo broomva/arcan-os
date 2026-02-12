@@ -1,5 +1,5 @@
 /**
- * @agent-os/daemon — Integration tests
+ * @arcan-os/daemon — Integration tests
  *
  * Tests the daemon HTTP API endpoints without an LLM.
  */

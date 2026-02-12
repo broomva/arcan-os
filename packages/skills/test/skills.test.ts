@@ -1,5 +1,5 @@
 /**
- * @agent-os/skills — Tests
+ * @arcan-os/skills — Tests
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';

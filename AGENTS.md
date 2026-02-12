@@ -78,7 +78,7 @@ tool-kernel    engine-adapter ← context ← skills
   └───────── daemon (integration point) ← observability
 ```
 
-All packages use `workspace:*` for internal dependencies. The `@agent-os/core` package is the foundation — every other package depends on it.
+All packages use `workspace:*` for internal dependencies. The `@arcan-os/core` package is the foundation — every other package depends on it.
 
 ---
 
@@ -178,14 +178,14 @@ bun run clean
 2. **File naming:** kebab-case (`skill-loader.ts`, `ai-sdk-engine.ts`)
 3. **Type exports:** Export interfaces/types alongside implementations
 4. **Error handling:** Throw descriptive `Error` with message, catch at boundaries
-5. **IDs:** Use `generateId()` from `@agent-os/core` (returns ULIDs)
-6. **Timestamps:** Use `now()` from `@agent-os/core` (returns `Date.now()`)
+5. **IDs:** Use `generateId()` from `@arcan-os/core` (returns ULIDs)
+6. **Timestamps:** Use `now()` from `@arcan-os/core` (returns `Date.now()`)
 7. **Async generators:** Engine adapter uses `async *run()` yielding `AgentEvent`s
 8. **Comments:** Section headers use `// ---` divider lines for visual grouping
 
 ### Adding a New Package
 
-1. Create `packages/<name>/package.json` with `"name": "@agent-os/<name>"`
+1. Create `packages/<name>/package.json` with `"name": "@arcan-os/<name>"`
 2. Create `packages/<name>/tsconfig.json` extending root config
 3. Create `packages/<name>/src/index.ts` as barrel export
 4. Create `packages/<name>/test/<name>.test.ts`

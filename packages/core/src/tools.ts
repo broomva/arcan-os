@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Tool types
+ * @arcan-os/core — Tool types
  *
  * Tool handler interface and context for the tool kernel.
  * (V1 spec §5)

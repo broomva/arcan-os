@@ -9,7 +9,7 @@ import type {
   AgentEvent,
   RunConfig,
   SessionSnapshotData,
-} from '@agent-os/core';
+} from '@arcan-os/core';
 import type { Kernel } from '../../kernel';
 
 // ---------------------------------------------------------------------------

@@ -1,11 +1,11 @@
-import type { AgentEvent, RunConfig } from '@agent-os/core';
+import type { AgentEvent, RunConfig } from '@arcan-os/core';
 import { createParser, type EventSourceParser } from 'eventsource-parser';
 import { ofetch } from 'ofetch';
 
 export class AgentClient {
   private baseUrl: string;
 
-  constructor(baseUrl = 'http://localhost:3000') {
+  constructor(baseUrl = 'http://localhost:4200') {
     this.baseUrl = baseUrl;
   }
 
@@ -13,7 +13,7 @@ export class AgentClient {
    * List all session IDs.
    */
   async listSessions(): Promise<string[]> {
-    return ofetch(`${this.baseUrl}/v1/sessions`);
+    return ofetch(`${this.baseUrl}/v1/sessions/list`);
   }
 
   /**

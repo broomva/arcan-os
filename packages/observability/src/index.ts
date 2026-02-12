@@ -1,5 +1,5 @@
 /**
- * @agent-os/observability
+ * @arcan-os/observability
  */
 
 export { EventTracer } from './event-tracer.js';

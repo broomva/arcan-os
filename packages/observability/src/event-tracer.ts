@@ -1,11 +1,11 @@
 /**
- * @agent-os/observability — Event Tracer
+ * @arcan-os/observability — Event Tracer
  *
  * Bridges Agent OS events to OTel spans for non-AI-SDK activity.
  * Covers: tool execution timing, approval wait time, run lifecycle.
  */
 
-import type { AgentEvent } from '@agent-os/core';
+import type { AgentEvent } from '@arcan-os/core';
 import {
   type Span,
   SpanKind,

@@ -4,7 +4,7 @@ import type {
   OutputDeltaPayload,
   ToolCallPayload,
   ToolResultPayload,
-} from '@agent-os/core';
+} from '@arcan-os/core';
 import { Box, Text, useApp } from 'ink';
 import Markdown from 'ink-markdown';
 import Spinner from 'ink-spinner';

@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Engine types
+ * @arcan-os/core — Engine types
  *
  * Engine abstraction interface. The OS depends on this single interface.
  * Nothing else in the system knows which AI provider is being used.

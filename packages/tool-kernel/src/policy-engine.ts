@@ -1,5 +1,5 @@
 /**
- * @agent-os/tool-kernel — Policy Engine
+ * @arcan-os/tool-kernel — Policy Engine
  *
  * Loads and applies policy.yaml configuration.
  * (V1 spec §41)
@@ -12,7 +12,7 @@ import type {
   PolicyConfig,
   RiskProfile,
   ToolPolicy,
-} from '@agent-os/core';
+} from '@arcan-os/core';
 import { parse as parseYaml } from 'yaml';
 
 // ---------------------------------------------------------------------------

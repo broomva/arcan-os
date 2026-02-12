@@ -1,5 +1,5 @@
 /**
- * @agent-os/skills — Skill Injector
+ * @arcan-os/skills — Skill Injector
  *
  * Formats skills into system prompt sections.
  * Each skill's content is wrapped in a clear section header.

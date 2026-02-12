@@ -1,9 +1,9 @@
 /**
- * @agent-os/observability — Tests
+ * @arcan-os/observability — Tests
  */
 
 import { afterEach, describe, expect, it } from 'bun:test';
-import type { AgentEvent } from '@agent-os/core';
+import type { AgentEvent } from '@arcan-os/core';
 import { EventTracer } from '../src/event-tracer.js';
 import {
   getInMemoryExporter,

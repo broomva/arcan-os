@@ -1,12 +1,12 @@
 /**
- * @agent-os/context — Tests
+ * @arcan-os/context — Tests
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { AgentEvent } from '@agent-os/core';
-import { SkillRegistry } from '@agent-os/skills';
+import type { AgentEvent } from '@arcan-os/core';
+import { SkillRegistry } from '@arcan-os/skills';
 import { ContextAssembler } from '../src/context-assembler.js';
 import { projectMessages } from '../src/message-history.js';
 

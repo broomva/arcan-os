@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Utilities
+ * @arcan-os/core — Utilities
  *
  * Shared utility functions used across packages.
  */

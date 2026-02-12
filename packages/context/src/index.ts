@@ -1,5 +1,5 @@
 /**
- * @agent-os/context
+ * @arcan-os/context
  */
 
 export type { ContextAssemblerConfig } from './context-assembler.js';

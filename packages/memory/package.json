@@ -1,5 +1,5 @@
 {
-  "name": "@agent-os/memory",
+  "name": "@arcan-os/memory",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -34,12 +34,12 @@
   "devDependencies": {
     "bun-types": "latest",
     "typescript": "^5.9.3",
-    "@agent-os/tsconfig": "workspace:*"
+    "@arcan-os/tsconfig": "workspace:*"
   },
   "dependencies": {
-    "@agent-os/core": "workspace:*",
-    "@agent-os/event-store": "workspace:*",
-    "@agent-os/run-manager": "workspace:*",
+    "@arcan-os/core": "workspace:*",
+    "@arcan-os/event-store": "workspace:*",
+    "@arcan-os/run-manager": "workspace:*",
     "ai": "^6.0.81",
     "rxjs": "^7.8.2",
     "zod": "^4.3.6"

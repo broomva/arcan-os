@@ -4,7 +4,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import type { ToolContext, ToolHandler } from '@agent-os/core';
+import type { ToolContext, ToolHandler } from '@arcan-os/core';
 import { z } from 'zod';
 
 export const inputSchema = z.object({

@@ -1,5 +1,5 @@
 /**
- * @agent-os/skills — Skill Registry
+ * @arcan-os/skills — Skill Registry
  *
  * Indexes loaded skills and filters by relevance.
  * Supports filtering by name (from RunConfig.skills) and fuzzy matching.

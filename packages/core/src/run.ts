@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Run types
+ * @arcan-os/core — Run types
  *
  * Run lifecycle state machine and record types.
  * (V1 spec §13)

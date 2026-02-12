@@ -1,5 +1,5 @@
 /**
- * @agent-os/observability — OTel Setup
+ * @arcan-os/observability — OTel Setup
  *
  * Configures OpenTelemetry tracing for Agent OS.
  * AI SDK's `experimental_telemetry` emits OTel spans automatically.

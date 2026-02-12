@@ -1,5 +1,5 @@
 /**
- * @agent-os/core — Events
+ * @arcan-os/core — Events
  *
  * Canonical event model for Agent OS.
  * All system behavior is observable through a single event stream.
