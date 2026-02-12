@@ -1,12 +1,10 @@
 import { Box, Text } from 'ink';
-import Spinner from 'ink-spinner';
-import React, { useState, useEffect } from 'react';
 
 type MemoryPaneProps = {
   sessionId: string;
 };
 
-export function MemoryPane({ sessionId }: MemoryPaneProps) {
+export function MemoryPane({ sessionId: _sessionId }: MemoryPaneProps) {
   // TODO: Fetch actual memory from daemon
   // const [memory, setMemory] = useState<any>(null);
 

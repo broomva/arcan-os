@@ -12,7 +12,10 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "LICENSE"],
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/broomva/agent-os.git",
@@ -30,17 +33,17 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "typescript": "^5.8.0",
+    "typescript": "^5.9.3",
     "@agent-os/tsconfig": "workspace:*"
   },
   "dependencies": {
     "@agent-os/core": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/sdk-trace-base": "^1.30.0",
-    "@opentelemetry/sdk-trace-node": "^1.30.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.57.0"
+    "@opentelemetry/sdk-trace-base": "^2.5.0",
+    "@opentelemetry/sdk-trace-node": "^2.5.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.211.0"
   },
   "optionalDependencies": {
-    "langsmith": "^0.3.0"
+    "langsmith": "^0.5.2"
   }
 }

@@ -3,7 +3,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
-import type { AgentEvent } from '@agent-os/core';
 import { EventStore } from '../src/event-store.js';
 
 describe('EventStore', () => {

@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from 'ink';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Chat } from '../Chat.js';
 import { MemoryPane } from './MemoryPane.js';
 import { TracePane } from './TracePane.js';
@@ -11,7 +11,7 @@ type DashboardProps = {
 export function Dashboard({ sessionId }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<'memory' | 'trace'>('memory');
 
-  useInput((input, key) => {
+  useInput((input, _key) => {
     if (input === 'm') setActiveTab('memory');
     if (input === 't') setActiveTab('trace');
   });

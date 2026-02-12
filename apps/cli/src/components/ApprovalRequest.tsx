@@ -2,8 +2,6 @@ import { Box, Text } from 'ink';
 import TextInput from 'ink-text-input';
 import React from 'react';
 
-import type { ApprovalRequestedPayload } from '@agent-os/core';
-
 type ApprovalRequestProps = {
   toolId: string;
   args: Record<string, unknown>;

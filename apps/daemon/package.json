@@ -12,7 +12,10 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "LICENSE"],
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/broomva/agent-os.git",
@@ -30,8 +33,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@agent-os/core": "workspace:*",
     "@agent-os/context": "workspace:*",
+    "@agent-os/core": "workspace:*",
     "@agent-os/engine-adapter": "workspace:*",
     "@agent-os/event-store": "workspace:*",
     "@agent-os/memory": "workspace:*",
@@ -39,21 +42,23 @@
     "@agent-os/run-manager": "workspace:*",
     "@agent-os/skills": "workspace:*",
     "@agent-os/tool-kernel": "workspace:*",
+    "@ai-sdk/anthropic": "^3.0.42",
+    "@ai-sdk/openai": "^3.0.27",
+    "@elysiajs/openapi": "^1.4.14",
     "@sinclair/typebox": "^0.34.48",
-    "elysia": "^1.3.0",
-    "ai": "^4.3.0",
-    "@ai-sdk/anthropic": "^1.2.0",
-    "@ai-sdk/openai": "^1.3.0",
-    "pino": "^9.6.0",
-    "@t3-oss/env-core": "^0.12.0",
-    "zod": "^3.24.0"
+    "@t3-oss/env-core": "^0.13.10",
+    "ai": "^6.0.81",
+    "elysia": "^1.4.24",
+    "pino": "^10.3.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@agent-os/tsconfig": "workspace:*",
     "@types/bun": "^1.3.9",
     "@types/node": "^25.2.3",
     "bun-types": "latest",
-    "typescript": "^5.8.0",
-    "pino-pretty": "^13.0.0",
-    "@agent-os/tsconfig": "workspace:*"
+    "openapi-types": "^12.1.3",
+    "pino-pretty": "^13.1.3",
+    "typescript": "^5.9.3"
   }
 }

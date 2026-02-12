@@ -21,7 +21,12 @@ import type { Kernel } from '../../kernel';
 // ---------------------------------------------------------------------------
 
 async function runEngineLoop(kernel: Kernel, runId: string, config: RunConfig) {
-  if (!kernel.engine) return;
+  const ts = Date.now();
+  if (!kernel.engine) {
+    console.error(`[RunService:${ts}] No engine available for run ${runId}`);
+    return;
+  }
+  console.error(`[RunService:${ts}] Starting engine loop for run ${runId}`);
 
   // Assemble context
   const tools = kernel.toolKernel.getTools();
@@ -32,24 +37,32 @@ async function runEngineLoop(kernel: Kernel, runId: string, config: RunConfig) {
     sessionId: config.sessionId,
   });
 
-  const request = kernel.contextAssembler.assemble({
-    runConfig: config,
-    messages: [],
-    tools,
-    sessionSnapshot:
-      sessionSnapshot?.type === 'session'
-        ? (sessionSnapshot.data as unknown as SessionSnapshotData)
-        : undefined,
-  });
+  try {
+    const request = kernel.contextAssembler.assemble({
+      runConfig: config,
+      messages: [],
+      tools,
+      sessionSnapshot:
+        sessionSnapshot?.type === 'session'
+          ? (sessionSnapshot.data as unknown as SessionSnapshotData)
+          : undefined,
+    });
 
-  // Stream events from the engine
-  for await (const event of kernel.engine.run(request)) {
-    // Emit through RunManager → EventStore
-    kernel.runManager.emit(runId, event.type, event.payload);
+    console.error('[RunService] Context assembled. Calling engine.run()');
+
+    // Stream events from the engine
+    for await (const event of kernel.engine.run(request)) {
+      console.error(`[RunService] Loop received event: ${event.type}`);
+      // Emit through RunManager → EventStore
+      kernel.runManager.emit(runId, event.type, event.payload);
+    }
+
+    // Complete the run
+    kernel.runManager.completeRun(runId, 'Run completed successfully');
+  } catch (err) {
+    console.error(`[RunService] Engine loop error:`, err);
+    kernel.runManager.failRun(runId, String(err));
   }
-
-  // Complete the run
-  kernel.runManager.completeRun(runId, 'Run completed successfully');
 
   // Trigger Observational Memory processing
   if (kernel.memoryService) {
@@ -72,6 +85,10 @@ export const RunService = {
    * Returns the run record synchronously; the engine runs asynchronously.
    */
   createAndStart(kernel: Kernel, config: RunConfig) {
+    const ts = Date.now();
+    console.error(
+      `[RunService:${ts}] createAndStart called. Config: ${JSON.stringify(config)}. Engine present: ${!!kernel.engine}`,
+    );
     const record = kernel.runManager.createRun(config);
     const startEvent = kernel.runManager.startRun(record.runId);
 
@@ -133,6 +150,9 @@ export const RunService = {
           afterSeq,
           order: 'asc',
         });
+        console.error(
+          `[RunService] buildEventStream for ${runId}. Found ${existingEvents.length} existing events.`,
+        );
 
         let isTerminal = false;
         for (const event of existingEvents) {

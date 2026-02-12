@@ -7,9 +7,7 @@
  */
 
 import type {
-  AgentEngine,
   AgentEvent,
-  EngineRunRequest,
   RunCompletedPayload,
   RunConfig,
   RunFailedPayload,
@@ -18,12 +16,10 @@ import type {
   RunResumedPayload,
   RunStartedPayload,
   RunState,
-  VALID_TRANSITIONS,
 } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 import type { EventStore } from '@agent-os/event-store';
 import { ApprovalGate } from './approval-gate.js';
-import type { ApprovalDecision } from './approval-gate.js';
 
 // ---------------------------------------------------------------------------
 // Event listener
@@ -252,6 +248,7 @@ export class RunManager {
       type,
       payload,
     });
+    console.log(`[RunManager] Appended event: ${event.eventId} (${type})`);
 
     // Notify all listeners
     for (const listener of this.listeners) {

@@ -15,11 +15,11 @@ import { MemoryService } from '@agent-os/memory';
 import { RunManager } from '@agent-os/run-manager';
 import { SkillRegistry } from '@agent-os/skills';
 import {
-  ToolKernel,
   processRun,
   repoPatch,
   repoRead,
   repoSearch,
+  ToolKernel,
 } from '@agent-os/tool-kernel';
 import { env } from './env';
 
@@ -122,11 +122,17 @@ export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
       maxSteps: 25,
       telemetryEnabled: true,
     });
-  } catch {
+  } catch (e) {
     // Engine creation can fail if no API key is set — that's OK for testing
     console.warn(
-      `⚠️  Engine not available (model: ${modelSpec}). Runs will not invoke LLM.`,
+      `⚠️  Engine not available (model: ${modelSpec}). Runs will not invoke LLM. Error: ${e}`,
     );
+  }
+
+  if (engine) {
+    console.log(`✅ Engine initialized with model: ${modelSpec}`);
+  } else {
+    console.log(`❌ Engine is NULL. Check API keys.`);
   }
 
   // Memory Service

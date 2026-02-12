@@ -11,22 +11,30 @@ import { ApprovalModel } from './model';
 import { ApprovalService } from './service';
 
 export const approvals = (kernel: Kernel) =>
-  new Elysia({ prefix: '/v1/approvals' }).post(
+  new Elysia({ prefix: '/v1/approvals', tags: ['Approvals'] }).post(
     '/:approvalId',
-    ({ params, body }) => {
+    ({ params, body, status }) => {
       try {
         return ApprovalService.resolve(
           kernel.runManager.approvalGate,
           params.approvalId,
           { decision: body.decision, reason: body.reason },
         );
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        return new Response(JSON.stringify({ error: message }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return status(404, { error: message });
       }
     },
-    { body: ApprovalModel.resolveBody },
+    {
+      body: ApprovalModel.resolveBody,
+      response: {
+        200: ApprovalModel.resolveResponse,
+        404: ApprovalModel.errorResponse,
+      },
+      detail: {
+        summary: 'Resolve a pending approval',
+        description:
+          'Approves or denies a tool execution that is waiting for human review.',
+      },
+    },
   );

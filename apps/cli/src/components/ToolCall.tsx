@@ -1,6 +1,6 @@
 import type { ToolCallPayload, ToolResultPayload } from '@agent-os/core';
 import { Box, Text } from 'ink';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 type ToolCallProps = {
   toolId: string;
@@ -10,7 +10,7 @@ type ToolCallProps = {
 };
 
 export function ToolCall({ toolId, args, result, durationMs }: ToolCallProps) {
-  const [isExpanded, setIsExpanded] = useState(false); // TODO: interactive expand?
+  const [_isExpanded, _setIsExpanded] = useState(false); // TODO: interactive expand?
 
   const status = result ? (
     <Text color="green">✔</Text>

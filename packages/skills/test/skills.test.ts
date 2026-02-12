@@ -6,11 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { injectSkills, summarizeSkills } from '../src/skill-injector.js';
-import {
-  loadSkills,
-  parseFrontmatter,
-  parseSkillFile,
-} from '../src/skill-loader.js';
+import { loadSkills, parseFrontmatter } from '../src/skill-loader.js';
 import { SkillRegistry } from '../src/skill-registry.js';
 
 const TEST_DIR = join(import.meta.dir, '__test_workspace__');

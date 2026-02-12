@@ -1,7 +1,7 @@
-import { generateId, now } from '@agent-os/core';
 import type { AgentEvent, Observation } from '@agent-os/core';
-import { generateText, tool } from 'ai';
+import { generateId, now } from '@agent-os/core';
 import type { LanguageModel } from 'ai';
+import { generateText, tool } from 'ai';
 import { z } from 'zod';
 
 export class Observer {
@@ -31,7 +31,7 @@ ${transcript}`,
       tools: {
         recordObservations: tool({
           description: 'Record extracted observations from the transcript',
-          parameters: z.object({
+          inputSchema: z.object({
             observations: z.array(
               z.object({
                 type: z.enum(['fact', 'action', 'outcome']),
@@ -55,7 +55,7 @@ ${transcript}`,
     );
     if (!obsCall) return [];
 
-    const args = obsCall.args as {
+    const args = obsCall.input as {
       observations: Array<{
         type: 'fact' | 'action' | 'outcome';
         content: string;

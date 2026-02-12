@@ -10,8 +10,8 @@ import type {
   EngineRunRequest,
   RunConfig,
   SessionSnapshotData,
+  ToolHandler,
 } from '@agent-os/core';
-import type { ToolHandler } from '@agent-os/core';
 import type { SkillRegistry } from '@agent-os/skills';
 import { injectSkills } from '@agent-os/skills';
 

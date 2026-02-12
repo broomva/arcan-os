@@ -12,7 +12,10 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "LICENSE"],
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/broomva/agent-os.git",
@@ -30,10 +33,10 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "typescript": "^5.8.0",
+    "typescript": "^5.9.3",
     "@agent-os/tsconfig": "workspace:*"
   },
   "dependencies": {
-    "zod": "^3.24.0"
+    "zod": "^4.3.6"
   }
 }

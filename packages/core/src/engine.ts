@@ -16,24 +16,33 @@ import type { ToolHandler } from './tools.js';
 
 export type EngineChunkKind =
   | 'text-delta'
+  | 'reasoning-delta'
   | 'tool-call'
   | 'tool-result'
+  | 'tool-error'
+  | 'tool-approval-request'
   | 'step-start'
-  | 'step-finish'
+  | 'finish-step'
+  | 'start'
   | 'finish'
+  | 'source'
   | 'error';
 
 export interface EngineChunk {
   kind: EngineChunkKind;
-  /** For text-delta */
+  /** For text-delta / reasoning-delta */
   text?: string;
-  /** For tool-call */
+  /** For tool-call / tool-result / tool-error / tool-approval-request */
   toolCallId?: string;
   toolName?: string;
   args?: Record<string, unknown>;
   /** For tool-result */
   result?: unknown;
-  /** For step-finish */
+  /** For tool-error */
+  toolError?: string;
+  /** For tool-approval-request */
+  approvalId?: string;
+  /** For finish-step */
   stepNumber?: number;
   finishReason?: string;
   usage?: { inputTokens: number; outputTokens: number };

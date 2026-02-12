@@ -6,7 +6,7 @@
  * This module configures the TracerProvider and exporters.
  */
 
-import { type Tracer, trace } from '@opentelemetry/api';
+import type { Tracer } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
   InMemorySpanExporter,
@@ -47,10 +47,7 @@ let _inMemoryExporter: InMemorySpanExporter | null = null;
 export function setupTelemetry(config: OTelConfig = {}): Tracer {
   const serviceName = config.serviceName ?? 'agent-os';
 
-  const provider = new BasicTracerProvider();
-  _provider = provider;
-
-  // Add configured exporters
+  // Collect exporters
   const exporters: SpanExporter[] = config.exporters ?? [];
 
   // Add OTLP exporter if endpoint is set
@@ -82,9 +79,11 @@ export function setupTelemetry(config: OTelConfig = {}): Tracer {
     exporters.push(_inMemoryExporter);
   }
 
-  for (const exporter of exporters) {
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-  }
+  // OTel SDK v2: span processors must be passed via constructor
+  const provider = new BasicTracerProvider({
+    spanProcessors: exporters.map((e) => new SimpleSpanProcessor(e)),
+  });
+  _provider = provider;
 
   // Return tracer directly from the provider instance, NOT from the
   // global trace singleton (which can only be set once and silently

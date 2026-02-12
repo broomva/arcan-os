@@ -102,7 +102,7 @@ export class ApprovalGate {
    * Cancel all pending approvals (e.g., on run failure).
    */
   cancelAll(): void {
-    for (const [id, entry] of this.pending) {
+    for (const [_id, entry] of this.pending) {
       entry.reject(new Error('All approvals cancelled'));
     }
     this.pending.clear();

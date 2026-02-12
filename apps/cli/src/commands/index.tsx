@@ -1,5 +1,4 @@
 import { Box, Text } from 'ink';
-import React from 'react';
 import zod from 'zod';
 
 export const options = zod.object({
@@ -10,7 +9,7 @@ type Props = {
   options: zod.infer<typeof options>;
 };
 
-export default function Index({ options }: Props) {
+export default function Index({ options: _options }: Props) {
   return (
     <Box flexDirection="column" padding={1}>
       <Text color="green">Agent OS CLI</Text>

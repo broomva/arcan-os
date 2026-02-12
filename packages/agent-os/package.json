@@ -25,7 +25,10 @@
       "types": "@agent-os/engine-adapter"
     }
   },
-  "files": ["dist", "LICENSE"],
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/broomva/agent-os.git"
@@ -54,7 +57,7 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "typescript": "^5.8.0",
+    "typescript": "^5.9.3",
     "@agent-os/tsconfig": "workspace:*"
   }
 }

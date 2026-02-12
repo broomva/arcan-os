@@ -7,39 +7,28 @@
  * Uses Elysia's app.handle() for HTTP tests (same pattern as daemon.test.ts).
  */
 
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-import { createApp } from '../src/app';
-// Daemon — import from the same package's src
-import { createKernel } from '../src/kernel';
-
 import { ContextAssembler, projectMessages } from '@agent-os/context';
-// Skills + Context
-import { SkillRegistry } from '@agent-os/skills';
-
+// Core types
+import type { AgentEvent } from '@agent-os/core';
+import { now } from '@agent-os/core';
 // Observability
-import { EventTracer } from '@agent-os/observability';
 // Note: We need to mock telemetry for tests or rely on what's available
 // Since setupTelemetry is exported by @agent-os/observability, we can use it.
 import {
+  EventTracer,
   getInMemoryExporter,
   setupTelemetry,
   shutdownTelemetry,
 } from '@agent-os/observability';
-
-// Core types
-import type { AgentEvent } from '@agent-os/core';
-import { now } from '@agent-os/core';
+// Skills + Context
+import { SkillRegistry } from '@agent-os/skills';
+import { createApp } from '../src/app';
 import type { Kernel } from '../src/kernel';
+// Daemon — import from the same package's src
+import { createKernel } from '../src/kernel';
 
 const TEST_WORKSPACE = join(import.meta.dir, '__e2e_workspace__');
 
@@ -190,7 +179,7 @@ describe('E2E: Full Run Lifecycle', () => {
     const replayText = await replayRes.text();
 
     // Should NOT contain First but SHOULD contain Second, Third, completed
-    const lines = replayText
+    const _lines = replayText
       .split('\n')
       .filter((l: string) => l.startsWith('data: '));
     // It depends on how many lines each event takes.
@@ -392,7 +381,7 @@ describe('E2E: Skills + Context Assembly', () => {
       content: 'Looking at the code...',
     });
     expect(messages[1].role).toBe('assistant');
-    // @ts-ignore - toolCallId is checked
+    // @ts-expect-error - toolCallId is checked
     expect(messages[1].toolCallId).toBe('c1');
     expect(messages[2].role).toBe('tool');
     expect(messages[2].content).toBe('const x = 1;');

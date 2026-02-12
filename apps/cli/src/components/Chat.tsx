@@ -8,7 +8,7 @@ import type {
 import { Box, Text, useApp } from 'ink';
 import Markdown from 'ink-markdown';
 import Spinner from 'ink-spinner';
-import React, { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AgentClient } from '../client/agent-client.js';
 import type { UIMessage } from '../types.js';
 import { ApprovalRequest } from './ApprovalRequest.js';
@@ -109,35 +109,7 @@ export function Chat({ sessionId }: ChatProps) {
     setApproval(null);
   };
 
-  // Subscribe to Run Stream
-  useEffect(() => {
-    if (!currentRunId) return;
-
-    let isActive = true;
-    const fetchData = async () => {
-      try {
-        for await (const event of client.connectToRun(currentRunId)) {
-          if (!isActive) break;
-          processEvent(event);
-        }
-      } catch (e) {
-        setStatus(`Stream Error: ${e}`);
-      } finally {
-        setIsThinking(false);
-        setStatus('Ready');
-        setCurrentRunId(null);
-        setApproval(null);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isActive = false;
-    };
-  }, [currentRunId]);
-
-  const processEvent = (event: AgentEvent) => {
+  const processEvent = useCallback((event: AgentEvent) => {
     switch (event.type) {
       case 'run.started':
         setStatus('Thinking...');
@@ -202,7 +174,35 @@ export function Chat({ sessionId }: ChatProps) {
         setStatus('Failed');
         break;
     }
-  };
+  }, []);
+
+  // Subscribe to Run Stream
+  useEffect(() => {
+    if (!currentRunId) return;
+
+    let isActive = true;
+    const fetchData = async () => {
+      try {
+        for await (const event of client.connectToRun(currentRunId)) {
+          if (!isActive) break;
+          processEvent(event);
+        }
+      } catch (e) {
+        setStatus(`Stream Error: ${e}`);
+      } finally {
+        setIsThinking(false);
+        setStatus('Ready');
+        setCurrentRunId(null);
+        setApproval(null);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentRunId, processEvent]);
 
   return (
     <Box flexDirection="column" padding={1}>

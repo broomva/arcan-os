@@ -2,7 +2,7 @@ import glob from 'fast-glob';
 import fuzzy from 'fuzzy';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 type SmartInputProps = {
   onSubmit: (value: string, contextFiles: string[]) => void;
@@ -54,7 +54,7 @@ export function SmartInput({ onSubmit, placeholder }: SmartInputProps) {
     }
   }, [input, allFiles]);
 
-  useInput((key, inputData) => {
+  useInput((_key, inputData) => {
     if (mode === 'text') return;
 
     if (inputData.upArrow) {

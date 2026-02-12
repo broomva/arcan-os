@@ -10,8 +10,8 @@
  *   3. Global: ~/.agent-os/skills/SKILL.md
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 // ---------------------------------------------------------------------------
 // Types

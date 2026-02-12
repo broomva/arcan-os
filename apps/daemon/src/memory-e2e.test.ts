@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { beforeAll, describe, expect, test } from 'bun:test';
 import { generateId } from '@agent-os/core';
 import { createKernel } from './kernel';
 import { RunService } from './modules/runs/service';
@@ -55,7 +55,7 @@ describe('Observational Memory E2E', () => {
 
     // Check for memory.observed event
     const events = kernel.eventStore.query({ sessionId });
-    const observedEvent = events.find((e) => e.type === 'memory.observed');
+    const _observedEvent = events.find((e) => e.type === 'memory.observed');
 
     // If no LLM, we won't get observations.
     // So this test might be flaky without mocks.

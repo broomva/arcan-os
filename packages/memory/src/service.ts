@@ -1,4 +1,4 @@
-import type { AgentEvent, SessionSnapshotData } from '@agent-os/core';
+import type { SessionSnapshotData } from '@agent-os/core';
 import type { EventStore } from '@agent-os/event-store';
 import type { RunManager } from '@agent-os/run-manager';
 import type { LanguageModel } from 'ai';

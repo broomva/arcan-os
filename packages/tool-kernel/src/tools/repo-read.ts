@@ -33,7 +33,7 @@ export const repoRead: ToolHandler<Input, Output> = {
   category: 'read',
 
   async execute(input: Input, ctx: ToolContext): Promise<Output> {
-    const { resolve, join } = await import('node:path');
+    const { resolve } = await import('node:path');
     const fullPath = resolve(ctx.workspaceRoot, input.path);
 
     const content = readFileSync(fullPath, 'utf-8');

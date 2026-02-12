@@ -1,11 +1,10 @@
 import { Box, Text } from 'ink';
-import React from 'react';
 
 type TracePaneProps = {
   sessionId: string;
 };
 
-export function TracePane({ sessionId }: TracePaneProps) {
+export function TracePane({ sessionId: _sessionId }: TracePaneProps) {
   return (
     <Box flexDirection="column" padding={1}>
       <Text bold underline>

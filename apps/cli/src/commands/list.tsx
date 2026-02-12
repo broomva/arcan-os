@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink';
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AgentClient } from '../client/agent-client.js';
 
 const client = new AgentClient();

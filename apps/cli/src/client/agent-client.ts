@@ -1,5 +1,5 @@
 import type { AgentEvent, RunConfig } from '@agent-os/core';
-import { type EventSourceParser, createParser } from 'eventsource-parser';
+import { createParser, type EventSourceParser } from 'eventsource-parser';
 import { ofetch } from 'ofetch';
 
 export class AgentClient {
@@ -35,7 +35,7 @@ export class AgentClient {
   async *connectToRun(
     runId: string,
   ): AsyncGenerator<AgentEvent, void, unknown> {
-    const response = await fetch(`${this.baseUrl}/v1/runs/${runId}/stream`);
+    const response = await fetch(`${this.baseUrl}/v1/runs/${runId}/events`);
 
     if (!response.body) {
       throw new Error('No response body');

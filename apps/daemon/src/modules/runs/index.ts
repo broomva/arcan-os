@@ -12,16 +12,17 @@ import { RunModel } from './model';
 import { RunService } from './service';
 
 export const runs = (kernel: Kernel) =>
-  new Elysia({ prefix: '/v1/runs' })
+  new Elysia({ prefix: '/v1/runs', tags: ['Runs'] })
 
     // -----------------------------------------------------------------
     // POST /v1/runs — Create and start a run
     // -----------------------------------------------------------------
     .post(
       '/',
-      ({ body }) => {
+      async ({ body, status }) => {
+        console.error('[API] POST /v1/runs called');
         try {
-          return RunService.createAndStart(kernel, {
+          const run = await RunService.createAndStart(kernel, {
             sessionId: body.sessionId,
             prompt: body.prompt,
             model: body.model,
@@ -29,35 +30,51 @@ export const runs = (kernel: Kernel) =>
             skills: body.skills,
             maxSteps: body.maxSteps,
           });
-        } catch (error: unknown) {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          return new Response(JSON.stringify({ error: message }), {
-            status: 409,
-            headers: { 'Content-Type': 'application/json' },
-          });
+          console.error(`[API] Returning run: ${JSON.stringify(run)}`);
+          return run;
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          return status(409, { error: message });
         }
       },
-      { body: RunModel.createBody },
+      {
+        body: RunModel.createBody,
+        response: { 200: RunModel.createResponse, 409: RunModel.errorResponse },
+        detail: {
+          summary: 'Create and start a run',
+          description:
+            'Creates a new agent run and starts the engine loop in the background. Returns the run record synchronously.',
+        },
+      },
     )
 
     // -----------------------------------------------------------------
     // GET /v1/runs/:runId/events — SSE event stream with replay
     // -----------------------------------------------------------------
-    .get('/:runId/events', ({ params, request }) => {
-      const stream = RunService.buildEventStream(
-        kernel,
-        params.runId,
-        request.headers.get('Last-Event-ID'),
-        request.signal,
-      );
+    .get(
+      '/:runId/events',
+      ({ params, request }) => {
+        const stream = RunService.buildEventStream(
+          kernel,
+          params.runId,
+          request.headers.get('Last-Event-ID'),
+          request.signal,
+        );
 
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-          'X-Accel-Buffering': 'no',
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'X-Accel-Buffering': 'no',
+          },
+        });
+      },
+      {
+        detail: {
+          summary: 'Stream run events (SSE)',
+          description:
+            'Server-Sent Event stream that replays existing events then streams live events. Supports resumption via the Last-Event-ID header.',
         },
-      });
-    });
+      },
+    );

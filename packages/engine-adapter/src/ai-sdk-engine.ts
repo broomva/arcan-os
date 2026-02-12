@@ -17,19 +17,18 @@
 import type {
   AgentEngine,
   AgentEvent,
+  ApprovalRequestedPayload,
   EngineRequestPayload,
   EngineResponsePayload,
   EngineRunRequest,
   OutputDeltaPayload,
   OutputMessagePayload,
   ToolCallPayload,
-  ToolHandler,
   ToolResultPayload,
 } from '@agent-os/core';
 import { generateId, now } from '@agent-os/core';
 import type { ToolKernel } from '@agent-os/tool-kernel';
-import { type CoreTool, streamText } from 'ai';
-import type { ZodSchema } from 'zod';
+import { stepCountIs, streamText, type ToolSet, tool } from 'ai';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,11 +77,16 @@ export class AiSdkEngine implements AgentEngine {
    *   5. Each fullStream part is mapped to a canonical AgentEvent
    */
   async *run(req: EngineRunRequest): AsyncIterable<AgentEvent> {
-    const runId = req.runConfig.sessionId; // Will be set by caller
+    const runId = req.runConfig.sessionId;
     const sessionId = req.runConfig.sessionId;
 
     // Convert tools to AI SDK format
-    const tools = this.buildTools(req.tools, runId, sessionId);
+    const tools = this.buildTools(
+      req.tools,
+      runId,
+      sessionId,
+      req.runConfig.workspace,
+    );
 
     // Build messages
     const messages = this.buildMessages(req);
@@ -115,9 +119,9 @@ export class AiSdkEngine implements AgentEngine {
     const result = streamText({
       model: this.model,
       system: req.systemPrompt,
-      messages: messages as import('ai').CoreMessage[],
+      messages: messages as import('ai').ModelMessage[],
       tools,
-      maxSteps: this.maxSteps,
+      stopWhen: stepCountIs(this.maxSteps),
 
       // ---------------------------------------------------------------
       // experimental_telemetry — OTel span emission for observability
@@ -135,47 +139,34 @@ export class AiSdkEngine implements AgentEngine {
             ...(this.tracer ? { tracer: this.tracer } : {}),
           }
         : undefined,
-      // TODO: Implement needsApproval support.
-      // Current AI SDK version does not support 'needsApproval' hook in streamText.
-      // We might need to handle tool execution manually or use a different pattern.
     });
 
     // Process fullStream — map each AI SDK part to a canonical AgentEvent
     for await (const part of result.fullStream) {
-      const p = part as
-        | { type: 'text-delta'; textDelta: string }
-        | {
-            type: 'tool-call';
-            toolCallId: string;
-            toolName: string;
-            args: unknown;
-          }
-        | {
-            type: 'tool-result';
-            toolCallId: string;
-            toolName: string;
-            result: unknown;
-          }
-        | {
-            type: 'step-finish';
-            usage: { totalTokens: number };
-            finishReason: string;
-          }
-        | { type: 'error'; error: unknown };
+      // biome-ignore lint/suspicious/noExplicitAny: AI SDK stream parts have a complex union type
+      const p = part as any;
       switch (p.type) {
+        // ----- Text output -----
         case 'text-delta':
           yield makeEvent<OutputDeltaPayload>('output.delta', {
-            text: p.textDelta,
+            text: p.text,
           });
-          // Accumulate text for the final message
-          currentMessageContent += p.textDelta;
+          currentMessageContent += p.text ?? '';
           break;
 
+        // ----- Reasoning (thinking) -----
+        case 'reasoning-delta':
+          yield makeEvent<OutputDeltaPayload>('output.delta', {
+            text: p.text,
+          });
+          break;
+
+        // ----- Tool execution -----
         case 'tool-call':
           yield makeEvent<ToolCallPayload>('tool.call', {
             callId: p.toolCallId,
             toolId: p.toolName,
-            args: p.args as Record<string, unknown>,
+            args: p.input ?? {},
           });
           break;
 
@@ -183,23 +174,64 @@ export class AiSdkEngine implements AgentEngine {
           yield makeEvent<ToolResultPayload>('tool.result', {
             callId: p.toolCallId,
             toolId: p.toolName,
-            result: p.result,
+            result: p.output,
             durationMs: 0,
             approved: true,
           });
           break;
 
-        case 'step-finish':
+        case 'tool-error':
+          yield makeEvent<ToolResultPayload>('tool.result', {
+            callId: p.toolCallId,
+            toolId: p.toolName,
+            result: { error: p.error },
+            durationMs: 0,
+            approved: true,
+          });
+          break;
+
+        // ----- Approval flow (AI SDK v6 native) -----
+        case 'tool-approval-request':
+          yield makeEvent<ApprovalRequestedPayload>('approval.requested', {
+            approvalId: p.approvalId,
+            callId: p.toolCall?.toolCallId ?? p.approvalId,
+            toolId: p.toolCall?.toolName ?? 'unknown',
+            args: p.toolCall?.input ?? {},
+            preview: {},
+            risk: {
+              toolId: p.toolCall?.toolName ?? 'unknown',
+              category: 'exec',
+              estimatedImpact: 'medium',
+              touchesSecrets: false,
+              touchesConfig: false,
+              touchesBuild: false,
+            },
+          });
+          break;
+
+        case 'tool-output-denied':
+          yield makeEvent<ToolResultPayload>('tool.result', {
+            callId: p.toolCallId,
+            toolId: p.toolName,
+            result: { denied: true },
+            durationMs: 0,
+            approved: false,
+          });
+          break;
+
+        // ----- Step lifecycle -----
+        case 'finish-step': {
           // Emit the full message if we have content
           if (currentMessageContent.trim()) {
             yield makeEvent<OutputMessagePayload>('output.message', {
               role: 'assistant',
               content: currentMessageContent,
             });
-            currentMessageContent = ''; // Reset for next step
+            currentMessageContent = '';
           }
 
           stepNumber++;
+
           yield makeEvent<EngineResponsePayload>('engine.response', {
             outputTokens: p.usage?.totalTokens ?? 0,
             latencyMs: 0,
@@ -207,13 +239,31 @@ export class AiSdkEngine implements AgentEngine {
             stepNumber,
           });
           break;
+        }
+
+        // ----- Stream lifecycle markers (silently ignored) -----
+        case 'start':
+        case 'start-step':
+        case 'finish':
+        case 'text-start':
+        case 'text-end':
+        case 'reasoning-start':
+        case 'reasoning-end':
+        case 'tool-input-start':
+        case 'tool-input-delta':
+        case 'tool-input-end':
+        case 'source':
+        case 'file':
+        case 'raw':
+        case 'abort':
+          break;
 
         case 'error':
-          // Errors bubble up to the RunManager
+          console.error('[AiSdkEngine] Stream error:', p.error);
           break;
 
         default:
-          // Ignore other part types (reasoning, sources, etc.)
+          console.error(`[AiSdkEngine] Unknown part type: ${p.type}`);
           break;
       }
     }
@@ -226,27 +276,42 @@ export class AiSdkEngine implements AgentEngine {
   /**
    * Convert Agent OS tool handlers to AI SDK CoreTool format.
    * Each tool's execute function delegates to the ToolKernel.
+   * Uses AI SDK v6 `tool()` helper for proper type inference
+   * and wires `needsApproval` from the ToolKernel policy engine.
    */
   private buildTools(
-    tools: ToolHandler[],
+    tools: import('@agent-os/core').ToolHandler[],
     runId: string,
     sessionId: string,
-  ): Record<string, CoreTool> {
-    const aiTools: Record<string, CoreTool> = {};
+    workspace?: string,
+  ): ToolSet {
+    const aiTools: ToolSet = {};
+    const kernel = this.toolKernel;
 
-    for (const tool of tools) {
-      aiTools[tool.id] = {
-        description: tool.description,
-        parameters: tool.inputSchema as unknown as ZodSchema<unknown>,
-        execute: async (args: unknown) => {
-          return this.toolKernel.execute(
-            tool.id,
-            args as Record<string, unknown>,
-            runId,
-            sessionId,
+    for (const t of tools) {
+      // AI SDK / Anthropic does not allow dots in tool names
+      const safeName = t.id.replace(/\./g, '_');
+      const toolId = t.id;
+
+      aiTools[safeName] = tool({
+        description: t.description,
+        inputSchema: t.inputSchema,
+        needsApproval: (input: unknown) => {
+          return kernel.needsApproval(
+            toolId,
+            (input ?? {}) as Record<string, unknown>,
           );
         },
-      };
+        execute: async (input: unknown) => {
+          return kernel.execute(
+            toolId,
+            (input ?? {}) as Record<string, unknown>,
+            runId,
+            sessionId,
+            workspace,
+          );
+        },
+      });
     }
 
     return aiTools;

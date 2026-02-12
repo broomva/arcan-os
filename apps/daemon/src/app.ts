@@ -6,6 +6,7 @@
  * prefix, routes, validation, and service logic.
  */
 
+import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
 import type { Kernel } from './kernel';
 
@@ -21,7 +22,29 @@ import { sessions } from './modules/sessions';
 
 export function createApp(kernel: Kernel) {
   return new Elysia()
+    .use(
+      openapi({
+        path: '/openapi',
+        provider: 'scalar',
+        documentation: {
+          info: {
+            title: 'Agent OS',
+            version: '0.1.0',
+            description: 'Event-sourced AI agent runtime API',
+          },
+          tags: [
+            { name: 'Health', description: 'Health checks' },
+            { name: 'Runs', description: 'Run lifecycle management' },
+            { name: 'Approvals', description: 'Tool approval gate' },
+            { name: 'Sessions', description: 'Session state projections' },
+          ],
+        },
+      }),
+    )
     .use(health)
+    .onRequest(({ request }) => {
+      console.log(`[App:${Date.now()}] ${request.method} ${request.url}`);
+    })
     .use(runs(kernel))
     .use(approvals(kernel))
     .use(sessions(kernel));

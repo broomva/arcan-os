@@ -1,7 +1,7 @@
-import { generateId, now } from '@agent-os/core';
 import type { Observation, Reflection } from '@agent-os/core';
-import { generateText, tool } from 'ai';
+import { generateId, now } from '@agent-os/core';
 import type { LanguageModel } from 'ai';
+import { generateText, tool } from 'ai';
 import { z } from 'zod';
 
 export class Reflector {
@@ -29,7 +29,7 @@ ${observationText}`,
       tools: {
         recordReflections: tool({
           description: 'Record synthesized reflections from observations',
-          parameters: z.object({
+          inputSchema: z.object({
             reflections: z.array(
               z.object({
                 topic: z
@@ -55,7 +55,7 @@ ${observationText}`,
     const refCall = toolCalls.find((tc) => tc.toolName === 'recordReflections');
     if (!refCall) return [];
 
-    const args = refCall.args as {
+    const args = refCall.input as {
       reflections: Array<{ topic: string; content: string; frequency: number }>;
     };
 

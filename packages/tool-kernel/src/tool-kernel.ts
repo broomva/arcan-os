@@ -6,7 +6,7 @@
  * (V1 spec §5)
  */
 
-import { join, relative, resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 import type {
   ControlPath,
   RiskProfile,
@@ -150,6 +150,7 @@ export class ToolKernel {
     args: Record<string, unknown>,
     runId: string,
     sessionId: string,
+    workspaceOverride?: string,
   ): Promise<unknown> {
     const tool = this.tools.get(toolId);
     if (!tool) {
@@ -165,7 +166,7 @@ export class ToolKernel {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     const ctx: ToolContext = {
-      workspaceRoot: this.workspaceRoot,
+      workspaceRoot: workspaceOverride ?? this.workspaceRoot,
       runId,
       sessionId,
       signal: controller.signal,

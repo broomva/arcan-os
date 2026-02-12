@@ -5,63 +5,59 @@
  * This package has no runtime dependencies on any other Agent OS package.
  */
 
+// Engine — adapter interface
+export type {
+  AgentEngine,
+  EngineChunk,
+  EngineChunkKind,
+  EngineMessage,
+  EngineRunRequest,
+} from './engine.js';
 // Events — canonical event model
 export type {
-  AgentEventType,
   AgentEvent,
-  RunStartedPayload,
-  RunCompletedPayload,
-  RunFailedPayload,
-  RunPausedPayload,
-  RunResumedPayload,
-  OutputDeltaPayload,
-  OutputMessagePayload,
-  ToolCallPayload,
-  ToolResultPayload,
+  AgentEventType,
   ApprovalRequestedPayload,
   ApprovalResolvedPayload,
   ArtifactEmittedPayload,
   CheckpointCreatedPayload,
   EngineRequestPayload,
   EngineResponsePayload,
-  WorkingMemorySnapshotPayload,
-  StateSnapshotPayload,
-  RiskProfile,
   MemoryObservedPayload,
   MemoryReflectedPayload,
+  OutputDeltaPayload,
+  OutputMessagePayload,
+  RiskProfile,
+  RunCompletedPayload,
+  RunFailedPayload,
+  RunPausedPayload,
+  RunResumedPayload,
+  RunStartedPayload,
+  StateSnapshotPayload,
+  ToolCallPayload,
+  ToolResultPayload,
+  WorkingMemorySnapshotPayload,
 } from './events.js';
-
 // Run — lifecycle state machine
-export type { RunState, RunRecord, RunConfig } from './run.js';
+export type { RunConfig, RunRecord, RunState } from './run.js';
 export { VALID_TRANSITIONS } from './run.js';
-
-// Tools — kernel interface
-export type {
-  ToolHandler,
-  ToolContext,
-  ControlPath,
-  ToolPolicy,
-  PolicyConfig,
-} from './tools.js';
-
-// Engine — adapter interface
-export type {
-  EngineChunkKind,
-  EngineChunk,
-  EngineRunRequest,
-  EngineMessage,
-  AgentEngine,
-} from './engine.js';
-
 // Snapshots — materialized projections
 export type {
-  Snapshot,
-  RunSnapshotData,
-  SessionSnapshotData,
   CheckpointSnapshotData,
   Observation,
   Reflection,
+  RunSnapshotData,
+  SessionSnapshotData,
+  Snapshot,
 } from './snapshots.js';
+// Tools — kernel interface
+export type {
+  ControlPath,
+  PolicyConfig,
+  ToolContext,
+  ToolHandler,
+  ToolPolicy,
+} from './tools.js';
 
 // Utilities
 export { generateId, now } from './utils.js';
