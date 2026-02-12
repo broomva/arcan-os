@@ -15,7 +15,7 @@
   "files": ["dist", "LICENSE"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/broomva/agent-os",
+    "url": "git+https://github.com/broomva/agent-os.git",
     "directory": "apps/daemon"
   },
   "publishConfig": {

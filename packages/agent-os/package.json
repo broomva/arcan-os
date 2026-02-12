@@ -6,12 +6,9 @@
   "description": "An event-sourced AI agent runtime. Install everything with a single package.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "agent": "./node_modules/.bin/agent",
-    "agent-os-daemon": "./node_modules/.bin/agent-os-daemon"
-  },
   "exports": {
     ".": {
+      "bun": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
@@ -31,13 +28,14 @@
   "files": ["dist", "LICENSE"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/broomva/agent-os"
+    "url": "git+https://github.com/broomva/agent-os.git"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly --outDir dist",
+    "dev": "tsc --watch --emitDeclarationOnly --outDir dist",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

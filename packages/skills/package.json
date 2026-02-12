@@ -7,6 +7,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "bun": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
@@ -14,7 +15,7 @@
   "files": ["dist", "LICENSE"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/broomva/agent-os",
+    "url": "git+https://github.com/broomva/agent-os.git",
     "directory": "packages/skills"
   },
   "publishConfig": {
@@ -22,6 +23,7 @@
   },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target bun && tsc --emitDeclarationOnly --outDir dist",
+    "dev": "tsc --watch --emitDeclarationOnly --outDir dist",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "clean": "rm -rf dist"

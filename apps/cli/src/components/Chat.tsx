@@ -8,14 +8,15 @@ import type {
 import { Box, Text, useApp } from 'ink';
 import Markdown from 'ink-markdown';
 import Spinner from 'ink-spinner';
-import TextInput from 'ink-text-input';
 import React, { useState, useEffect } from 'react';
 import { AgentClient } from '../client/agent-client.js';
 import type { UIMessage } from '../types.js';
 import { ApprovalRequest } from './ApprovalRequest.js';
+import { SmartInput } from './Input/SmartInput.js';
 import { ToolCall } from './ToolCall.js';
 
 // Initialize client (TODO: Move to context or prop)
+
 const client = new AgentClient();
 
 type ChatProps = {
@@ -24,7 +25,6 @@ type ChatProps = {
 
 export function Chat({ sessionId }: ChatProps) {
   const { exit } = useApp();
-  const [input, setInput] = useState('');
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
   const [status, setStatus] = useState('Ready');
@@ -39,25 +39,53 @@ export function Chat({ sessionId }: ChatProps) {
   }, []);
 
   // Handle Input Submit
-  const handleSubmit = async (value: string) => {
+  const handleSubmit = async (value: string, contextFiles: string[]) => {
     if (!value.trim()) return;
 
-    setInput('');
+    // Handle commands
+    if (value.startsWith('/')) {
+      const cmd = value.trim();
+      if (cmd === '/clear') {
+        setMessages([]);
+        return;
+      }
+      if (cmd === '/quit') {
+        exit();
+        return;
+      }
+      // TODO: Handle dashboard switch if possible (requires parent callback)
+    }
+
     setIsThinking(true);
     setStatus('Starting run...');
 
-    // Optimistic user message
+    // Optimistic user message matches what we send
+    const displayContent =
+      contextFiles.length > 0
+        ? `${value}\n\n[Context: ${contextFiles.map((f) => `@${f}`).join(', ')}]`
+        : value;
+
     const userMsg: UIMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: value,
+      content: displayContent,
     };
     setMessages((prev) => [...prev, userMsg]);
 
     try {
+      // Create context block to append to prompt
+      // In a real implementation, we'd send `context` array to the daemon
+      // For now, we simulate it by reading files client-side or just appending text
+      // TODO: AgentClient should support `context` field in CreateRun
+
+      let prompt = value;
+      if (contextFiles.length > 0) {
+        prompt += `\n\nContext Files:\n${JSON.stringify(contextFiles)}`;
+      }
+
       const { runId } = await client.createRun({
         sessionId,
-        prompt: value,
+        prompt: prompt,
       });
       setCurrentRunId(runId);
     } catch (e) {
@@ -219,15 +247,10 @@ export function Chat({ sessionId }: ChatProps) {
       )}
 
       {!isThinking && !approval && (
-        <Box borderStyle="round" borderColor="green" paddingX={1}>
-          <Text color="green">❯ </Text>
-          <TextInput
-            value={input}
-            onChange={setInput}
-            onSubmit={handleSubmit}
-            placeholder="Ask the agent..."
-          />
-        </Box>
+        <SmartInput
+          onSubmit={handleSubmit}
+          placeholder="Ask agent... (/ for commands, @ for context)"
+        />
       )}
     </Box>
   );
