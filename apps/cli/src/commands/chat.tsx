@@ -1,5 +1,6 @@
 import zod from 'zod';
 import { Chat } from '../components/Chat.js';
+import { ClientProvider } from '../context/client-context.js';
 
 export const options = zod.object({
   id: zod.string().optional().describe('Session ID to resume'),
@@ -13,5 +14,9 @@ export default function ChatCommand({ options }: Props) {
   // Generate random session ID if not provided
   const sessionId = options.id || crypto.randomUUID();
 
-  return <Chat sessionId={sessionId} />;
+  return (
+    <ClientProvider>
+      <Chat sessionId={sessionId} />
+    </ClientProvider>
+  );
 }

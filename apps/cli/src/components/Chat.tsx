@@ -9,21 +9,18 @@ import { Box, Text, useApp } from 'ink';
 import Markdown from 'ink-markdown';
 import Spinner from 'ink-spinner';
 import { useCallback, useEffect, useState } from 'react';
-import { AgentClient } from '../client/agent-client.js';
+import { useClient } from '../context/client-context.js';
 import type { UIMessage } from '../types.js';
 import { ApprovalRequest } from './ApprovalRequest.js';
 import { SmartInput } from './Input/SmartInput.js';
 import { ToolCall } from './ToolCall.js';
-
-// Initialize client (TODO: Move to context or prop)
-
-const client = new AgentClient();
 
 type ChatProps = {
   sessionId: string;
 };
 
 export function Chat({ sessionId }: ChatProps) {
+  const client = useClient();
   const { exit } = useApp();
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
@@ -35,8 +32,53 @@ export function Chat({ sessionId }: ChatProps) {
 
   // Load history on mount
   useEffect(() => {
-    // TODO: client.getHistory(sessionId).then(setMessages);
-  }, []);
+    client
+      .getSessionState(sessionId)
+      .then((state) => {
+        const restored: UIMessage[] = [];
+        for (const event of state.pendingEvents) {
+          if (event.type === 'output.delta') {
+            const payload = event.payload as OutputDeltaPayload;
+            const last = restored[restored.length - 1];
+            if (
+              last?.role === 'assistant' &&
+              !last.isTool &&
+              !last.isApproval
+            ) {
+              last.content = (last.content || '') + payload.text;
+            } else {
+              restored.push({
+                id: event.eventId,
+                role: 'assistant',
+                content: payload.text,
+              });
+            }
+          } else if (event.type === 'tool.call') {
+            const payload = event.payload as ToolCallPayload;
+            restored.push({
+              id: event.eventId,
+              role: 'assistant',
+              isTool: true,
+              toolCall: payload,
+            });
+          } else if (event.type === 'tool.result') {
+            const payload = event.payload as ToolResultPayload;
+            const toolMsg = restored.find(
+              (m) => m.isTool && m.toolCall?.callId === payload.callId,
+            );
+            if (toolMsg) {
+              toolMsg.toolResult = payload;
+            }
+          }
+        }
+        if (restored.length > 0) {
+          setMessages(restored);
+        }
+      })
+      .catch(() => {
+        // Session may not exist yet — that's fine for new sessions
+      });
+  }, [client, sessionId]);
 
   // Handle Input Submit
   const handleSubmit = async (value: string, contextFiles: string[]) => {
@@ -53,7 +95,7 @@ export function Chat({ sessionId }: ChatProps) {
         exit();
         return;
       }
-      // TODO: Handle dashboard switch if possible (requires parent callback)
+      // DEFERRED: Dashboard switch requires a routing architecture (parent callback or navigation layer)
     }
 
     setIsThinking(true);
@@ -73,11 +115,7 @@ export function Chat({ sessionId }: ChatProps) {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      // Create context block to append to prompt
-      // In a real implementation, we'd send `context` array to the daemon
-      // For now, we simulate it by reading files client-side or just appending text
-      // TODO: AgentClient should support `context` field in CreateRun
-
+      // DEFERRED: Send context files natively once daemon RunConfig supports a `context` field
       let prompt = value;
       if (contextFiles.length > 0) {
         prompt += `\n\nContext Files:\n${JSON.stringify(contextFiles)}`;
@@ -96,16 +134,23 @@ export function Chat({ sessionId }: ChatProps) {
 
   const handleApprove = async () => {
     if (!approval || !currentRunId) return;
-    // TODO: Client needs approveTool(runId, approvalId) method
-    // For now we just log it or fail
     setStatus('Approving...');
+    try {
+      await client.resolveApproval(approval.approvalId, 'approve');
+    } catch (e) {
+      setStatus(`Approval error: ${e}`);
+    }
     setApproval(null);
   };
 
   const handleDeny = async () => {
     if (!approval || !currentRunId) return;
-    // TODO: Client needs denyTool(runId, approvalId) method
     setStatus('Denying...');
+    try {
+      await client.resolveApproval(approval.approvalId, 'deny');
+    } catch (e) {
+      setStatus(`Denial error: ${e}`);
+    }
     setApproval(null);
   };
 
@@ -202,7 +247,7 @@ export function Chat({ sessionId }: ChatProps) {
     return () => {
       isActive = false;
     };
-  }, [currentRunId, processEvent]);
+  }, [client, currentRunId, processEvent]);
 
   return (
     <Box flexDirection="column" padding={1}>

@@ -10,7 +10,7 @@ type ToolCallProps = {
 };
 
 export function ToolCall({ toolId, args, result, durationMs }: ToolCallProps) {
-  const [_isExpanded, _setIsExpanded] = useState(false); // TODO: interactive expand?
+  const [_isExpanded, _setIsExpanded] = useState(false); // DEFERRED: UI polish — add interactive expand/collapse for tool args and results
 
   const status = result ? (
     <Text color="green">✔</Text>

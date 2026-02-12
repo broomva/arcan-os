@@ -270,6 +270,23 @@ export class EventStore {
   }
 
   // -------------------------------------------------------------------------
+  // Sessions
+  // -------------------------------------------------------------------------
+
+  /**
+   * List all distinct session IDs, ordered by most recent event first.
+   */
+  listSessionIds(): string[] {
+    const rows = this.db
+      .prepare(
+        'SELECT session_id, MAX(ts) as last_ts FROM events GROUP BY session_id ORDER BY last_ts DESC',
+      )
+      .all() as Array<{ session_id: string; last_ts: number }>;
+
+    return rows.map((r) => r.session_id);
+  }
+
+  // -------------------------------------------------------------------------
   // Lifecycle
   // -------------------------------------------------------------------------
 

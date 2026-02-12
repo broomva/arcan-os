@@ -1,10 +1,9 @@
 import { Box, Text } from 'ink';
 import { useEffect, useState } from 'react';
-import { AgentClient } from '../client/agent-client.js';
+import { ClientProvider, useClient } from '../context/client-context.js';
 
-const client = new AgentClient();
-
-export default function ListCommand() {
+function SessionList() {
+  const client = useClient();
   const [sessions, setSessions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +13,7 @@ export default function ListCommand() {
       .then(setSessions)
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [client]);
 
   if (loading) return <Text>Loading sessions...</Text>;
 
@@ -40,5 +39,13 @@ export default function ListCommand() {
         <Text key={id}>• {id}</Text>
       ))}
     </Box>
+  );
+}
+
+export default function ListCommand() {
+  return (
+    <ClientProvider>
+      <SessionList />
+    </ClientProvider>
   );
 }

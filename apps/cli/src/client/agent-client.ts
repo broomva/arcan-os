@@ -10,17 +10,27 @@ export class AgentClient {
   }
 
   /**
-   * List all sessions
+   * List all session IDs.
    */
   async listSessions(): Promise<string[]> {
-    // TODO: Implement list sessions endpoint in daemon
-    // For now, we return a mock or expect the daemon to have it
-    // return ofetch(`${this.baseUrl}/v1/sessions`);
-    return [];
+    return ofetch(`${this.baseUrl}/v1/sessions`);
   }
 
   /**
-   * Create a new run
+   * Get materialized session state (snapshot + pending events + pending approvals).
+   */
+  async getSessionState(sessionId: string): Promise<{
+    sessionId: string;
+    snapshot: unknown;
+    pendingEvents: AgentEvent[];
+    pendingApprovals: unknown[];
+    ts: number;
+  }> {
+    return ofetch(`${this.baseUrl}/v1/sessions/${sessionId}/state`);
+  }
+
+  /**
+   * Create a new run.
    */
   async createRun(config: RunConfig): Promise<{ runId: string }> {
     return ofetch(`${this.baseUrl}/v1/runs`, {
@@ -30,7 +40,21 @@ export class AgentClient {
   }
 
   /**
-   * Connect to a run's event stream
+   * Resolve a pending approval (approve or deny).
+   */
+  async resolveApproval(
+    approvalId: string,
+    decision: 'approve' | 'deny',
+    reason?: string,
+  ): Promise<{ status: string; approvalId: string }> {
+    return ofetch(`${this.baseUrl}/v1/approvals/${approvalId}`, {
+      method: 'POST',
+      body: { decision, reason },
+    });
+  }
+
+  /**
+   * Connect to a run's event stream.
    */
   async *connectToRun(
     runId: string,

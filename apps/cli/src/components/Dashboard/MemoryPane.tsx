@@ -5,8 +5,7 @@ type MemoryPaneProps = {
 };
 
 export function MemoryPane({ sessionId: _sessionId }: MemoryPaneProps) {
-  // TODO: Fetch actual memory from daemon
-  // const [memory, setMemory] = useState<any>(null);
+  // DEFERRED: Fetch memory via AgentClient.getSessionState() and display snapshot observations/reflections
 
   return (
     <Box flexDirection="column" padding={1}>

@@ -5,6 +5,9 @@
 import { t } from 'elysia';
 
 export namespace SessionModel {
+  export const listResponse = t.Array(t.String());
+  export type listResponse = typeof listResponse.static;
+
   export const stateResponse = t.Object({
     sessionId: t.String(),
     snapshot: t.Any(),
