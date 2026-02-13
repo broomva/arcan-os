@@ -27,6 +27,52 @@ Arcan OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
   - The full project must build successfully via `bun run build`.
   - Commits that fail these checks will be rejected by pre-commit hooks.
 
+### Pre-Commit Workflow for AI Agents
+
+**IMPORTANT**: Before committing any code changes, AI agents MUST follow this workflow:
+
+#### For All Changes
+1. **Auto-fix linting and formatting:**
+   ```bash
+   bunx biome check --write .
+   ```
+   This fixes formatting issues and safe lint violations automatically.
+
+2. **Verify type safety:**
+   ```bash
+   bun run typecheck
+   ```
+   All TypeScript errors must be resolved before committing.
+
+#### For Larger Implementations (New Features, Refactors)
+Additionally run:
+
+3. **Verify tests pass:**
+   ```bash
+   bun test
+   ```
+   All existing tests must pass. Add new tests for new functionality.
+
+4. **Verify build succeeds:**
+   ```bash
+   bun run build
+   ```
+   The entire monorepo must build without errors.
+
+#### Commit Pattern
+```bash
+# 1. Fix formatting and linting
+bunx biome check --write .
+
+# 2. Stage changes
+git add <files>
+
+# 3. Commit (pre-commit hooks will run checks automatically)
+git commit -m "feat: description"
+```
+
+**Note**: The pre-commit hook will automatically run `bun run check` and `bun run typecheck`. If you've already run these manually and fixed all issues, the commit will succeed immediately.
+
 ---
 
 ## Technology Stack
