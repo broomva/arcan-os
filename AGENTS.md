@@ -14,6 +14,7 @@ Arcan OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
 - `docs/ARCAN_OS_V1.md` — V1 specification (referenced as "§" sections throughout the code)
 - `docs/ARCAN_OS_KERNEL.md` — Kernel architecture overview
 - `docs/OPENAI_CODEX_ARCHITECTURE_ANALYSIS.md` — Reference architecture analysis
+- `docs/HARNESS_UPGRADE_PLAN.md` — Incremental harness reliability roadmap (anchored edits, verification, repair loops)
 
 ### AI Assistant Guidelines
 - **Cursor**: Follow `.cursorrules` for coding standards.
@@ -25,6 +26,7 @@ Arcan OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
   - All code must pass `bun run check` (Biome linting/formatting).
   - All code must pass `bun run typecheck` (Strict TypeScript).
   - The full project must build successfully via `bun run build`.
+  - When finishing and validating a feature, agents must perform a brief self-learning loop (observe outcomes, reflect on gaps, and capture durable guidance) and update `AGENTS.md` plus the relevant `docs/` structure when new workflow or architecture knowledge is discovered.
   - Commits that fail these checks will be rejected by pre-commit hooks.
 
 ### Claude Code Configuration
@@ -360,6 +362,7 @@ setupTelemetry({
 | **Elysia (not Hono)** | Superior Bun integration, built-in type inference, native SSE support |
 | **`provider.getTracer()` over global** | OTel's global `trace` provider can only be set once. Using provider instance directly ensures each setup returns a working tracer |
 | **Skills as SKILL.md** | Compatible with skills.sh ecosystem. Multi-source discovery with priority ordering |
+| **Harness control in Arcan** | Keep AI SDK for streaming/data parts, but keep edit semantics, risk policy, and retry/repair determinism in Arcan tools and run orchestration |
 
 ---
 

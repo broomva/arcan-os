@@ -84,7 +84,7 @@ export class AiSdkEngine implements AgentEngine {
    *   5. Each fullStream part is mapped to a canonical AgentEvent
    */
   async *run(req: EngineRunRequest): AsyncIterable<AgentEvent> {
-    const runId = req.runConfig.sessionId;
+    const runId = req.runId;
     const sessionId = req.runConfig.sessionId;
 
     // Convert tools to AI SDK format
@@ -137,7 +137,7 @@ export class AiSdkEngine implements AgentEngine {
       experimental_telemetry: this.telemetryEnabled
         ? {
             isEnabled: true,
-            functionId: `arcan-os/run/${sessionId}`,
+            functionId: `arcan-os/run/${runId}`,
             metadata: {
               runId,
               sessionId,
@@ -171,7 +171,7 @@ export class AiSdkEngine implements AgentEngine {
         case 'tool-call':
           yield makeEvent<ToolCallPayload>('tool.call', {
             callId: p.toolCallId,
-            toolId: p.toolName,
+            toolId: this.toToolId(p.toolName),
             args: (p.input ?? {}) as Record<string, unknown>,
           });
           break;
@@ -179,7 +179,7 @@ export class AiSdkEngine implements AgentEngine {
         case 'tool-result':
           yield makeEvent<ToolResultPayload>('tool.result', {
             callId: p.toolCallId,
-            toolId: p.toolName,
+            toolId: this.toToolId(p.toolName),
             result: p.output,
             durationMs: 0,
             approved: true,
@@ -189,7 +189,7 @@ export class AiSdkEngine implements AgentEngine {
         case 'tool-error':
           yield makeEvent<ToolResultPayload>('tool.result', {
             callId: p.toolCallId,
-            toolId: p.toolName,
+            toolId: this.toToolId(p.toolName),
             result: { error: p.error },
             durationMs: 0,
             approved: true,
@@ -197,28 +197,26 @@ export class AiSdkEngine implements AgentEngine {
           break;
 
         // ----- Approval flow (AI SDK v6 native) -----
-        case 'tool-approval-request':
+        case 'tool-approval-request': {
+          const toolId = this.toToolId(p.toolCall.toolName);
+          const args = (p.toolCall.input ?? {}) as Record<string, unknown>;
+          const risk = this.toolKernel.assessRisk(toolId, args);
+
           yield makeEvent<ApprovalRequestedPayload>('approval.requested', {
             approvalId: p.approvalId,
             callId: p.toolCall.toolCallId,
-            toolId: p.toolCall.toolName,
-            args: (p.toolCall.input ?? {}) as Record<string, unknown>,
+            toolId,
+            args,
             preview: {},
-            risk: {
-              toolId: p.toolCall.toolName,
-              category: 'exec',
-              estimatedImpact: 'medium',
-              touchesSecrets: false,
-              touchesConfig: false,
-              touchesBuild: false,
-            },
+            risk,
           });
           break;
+        }
 
         case 'tool-output-denied':
           yield makeEvent<ToolResultPayload>('tool.result', {
             callId: p.toolCallId,
-            toolId: p.toolName,
+            toolId: this.toToolId(p.toolName),
             result: { denied: true },
             durationMs: 0,
             approved: false,
@@ -274,6 +272,10 @@ export class AiSdkEngine implements AgentEngine {
   // -----------------------------------------------------------------------
   // Internal helpers
   // -----------------------------------------------------------------------
+
+  private toToolId(name: string): string {
+    return name.replace(/_/g, '.');
+  }
 
   /**
    * Convert Arcan OS tool handlers to AI SDK CoreTool format.

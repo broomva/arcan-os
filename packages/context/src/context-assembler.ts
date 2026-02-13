@@ -47,6 +47,7 @@ export class ContextAssembler {
    * Assemble the full EngineRunRequest from a RunConfig + conversation history.
    */
   assemble(opts: {
+    runId: string;
     runConfig: RunConfig;
     messages: EngineMessage[];
     tools: ToolHandler[];
@@ -58,6 +59,7 @@ export class ContextAssembler {
     );
 
     return {
+      runId: opts.runId,
       runConfig: opts.runConfig,
       systemPrompt,
       messages: opts.messages,

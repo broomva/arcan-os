@@ -16,6 +16,7 @@ import { RunManager } from '@arcan-os/run-manager';
 import { SkillRegistry } from '@arcan-os/skills';
 import {
   processRun,
+  repoEdit,
   repoPatch,
   repoRead,
   repoSearch,
@@ -92,6 +93,7 @@ export async function createKernel(opts: KernelOptions = {}): Promise<Kernel> {
   toolKernel.register(repoRead);
   toolKernel.register(repoSearch);
   toolKernel.register(repoPatch);
+  toolKernel.register(repoEdit);
   toolKernel.register(processRun);
 
   // Rebuild seq counters if using persisted DB
