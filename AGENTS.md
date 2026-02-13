@@ -27,6 +27,31 @@ Arcan OS is a **modular, event-sourced agent runtime** that orchestrates AI codi
   - The full project must build successfully via `bun run build`.
   - Commits that fail these checks will be rejected by pre-commit hooks.
 
+### Claude Code Configuration
+
+This project uses comprehensive Claude Code settings for automation and security:
+
+**Configuration Files:**
+- `.claude/settings.local.json` — Permissions, hooks, and local settings (gitignored)
+- `.claude/rules/` — Topic-specific guidelines (code-style, testing, monorepo)
+- `CLAUDE.md` — Quick reference and commands
+
+**Automated Hooks:**
+- **SessionStart (compact)**: Re-injects project conventions after context compaction
+- **PostToolUse (Write/Edit)**: Auto-formats code with Biome after file modifications
+- **Stop**: Reminds to verify formatting, types, and tests after task completion
+
+**Security & Permissions:**
+- **Deny rules**: Blocks access to `.env` files, secrets directories, `.git/config`, and lockfiles
+- **Allow rules**: Pre-approved commands for Bun, Git, testing, and documentation fetching
+- **Defense-in-depth**: Multiple layers of protection for sensitive files
+
+**Topic-Specific Rules:**
+See `.claude/rules/` for detailed guidelines on:
+- Code style and naming conventions
+- Testing structure and coverage requirements
+- Monorepo workspace dependencies
+
 ### Pre-Commit Workflow for AI Agents
 
 **IMPORTANT**: Before committing any code changes, AI agents MUST follow this workflow:

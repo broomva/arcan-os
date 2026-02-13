@@ -3,14 +3,23 @@
 ## Project Context
 Arcan OS is an event-sourced AI agent runtime. It stores agent interactions as an immutable event stream in SQLite.
 
-## Hooks
+## Hooks & Automation
 
-This project has Claude Code hooks configured in `.claude/settings.local.json`:
+Configured in `.claude/settings.local.json`:
 
-- **PostToolUse (Write/Edit)**: Automatically runs `bunx biome check --write .` after file writes/edits to ensure code formatting
-- **UserPromptSubmit**: Logs when a new task starts
+- **SessionStart**: Re-inject conventions after context compaction
+- **PostToolUse (Write/Edit)**: Auto-format with Biome
+- **UserPromptSubmit**: Log task start
+- **Stop**: Remind to verify formatting, types, tests
 
-These hooks help maintain code quality automatically without requiring manual intervention.
+All formatting happens automatically — you don't need to run Biome manually.
+
+## Topic-Specific Rules
+
+Additional guidelines in `.claude/rules/`:
+- `code-style.md` — Naming, formatting, error handling
+- `testing.md` — Test runner, structure, coverage
+- `monorepo.md` — Workspace structure, dependencies
 
 ## Commands
 
