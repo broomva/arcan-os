@@ -45,6 +45,12 @@ export function createApp(kernel: Kernel) {
     .onRequest(({ request }) => {
       console.log(`[App:${Date.now()}] ${request.method} ${request.url}`);
     })
+    .onError(({ error, code }) => {
+      console.error(`[App Error] Code: ${code}, Error:`, error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return { error: errorMessage, code };
+    })
     .use(runs(kernel))
     .use(approvals(kernel))
     .use(sessionsList(kernel))
