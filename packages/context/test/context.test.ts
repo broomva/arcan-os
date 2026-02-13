@@ -97,6 +97,7 @@ describe('ContextAssembler', () => {
     });
 
     const request = assembler.assemble({
+      runId: 'r1',
       runConfig: { sessionId: 's1', prompt: 'do stuff' },
       messages: [{ role: 'user', content: 'hi' }],
       tools: [],

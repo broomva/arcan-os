@@ -33,6 +33,7 @@ const DEFAULT_POLICY: PolicyConfig = {
     'repo.read': { approval: 'never' },
     'repo.search': { approval: 'never' },
     'repo.patch': { approval: 'always' },
+    'repo.edit': { approval: 'always' },
     'process.run': { approval: 'risk' },
     'test.run': { approval: 'risk' },
     'lint.run': { approval: 'never' },

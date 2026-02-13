@@ -296,6 +296,7 @@ describe('E2E: Skills + Context Assembly', () => {
     });
 
     const request = assembler.assemble({
+      runId: 'r1',
       runConfig: {
         sessionId: 'test-session',
         prompt: 'Fix the TypeScript errors',

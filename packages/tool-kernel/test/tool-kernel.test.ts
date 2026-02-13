@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { PolicyEngine } from '../src/policy-engine.js';
 import { ToolKernel } from '../src/tool-kernel.js';
 import { processRun } from '../src/tools/process-run.js';
+import { repoEdit } from '../src/tools/repo-edit.js';
 import { repoPatch } from '../src/tools/repo-patch.js';
 import { repoRead } from '../src/tools/repo-read.js';
 
@@ -94,6 +95,7 @@ describe('ToolKernel', () => {
     kernel = new ToolKernel(TEST_DIR);
     kernel.register(repoRead);
     kernel.register(repoPatch);
+    kernel.register(repoEdit);
     kernel.register(processRun);
   });
 
@@ -108,7 +110,7 @@ describe('ToolKernel', () => {
   describe('registration', () => {
     it('registers and retrieves tools', () => {
       expect(kernel.getTool('repo.read')).toBeDefined();
-      expect(kernel.getTools()).toHaveLength(3);
+      expect(kernel.getTools()).toHaveLength(4);
     });
 
     it('rejects duplicate registration', () => {
@@ -209,6 +211,29 @@ describe('ToolKernel', () => {
       expect(result.range).toEqual({ start: 2, end: 2 });
     });
 
+    it('returns line anchors for robust edit workflows', async () => {
+      const result = (await kernel.execute(
+        'repo.read',
+        {
+          path: 'src/hello.ts',
+          startLine: 1,
+          endLine: 2,
+          includeAnchors: true,
+        },
+        'r1',
+        's1',
+      )) as {
+        content: string;
+        anchors: Array<{ line: number; hash: string }>;
+      };
+
+      expect(result.content).toBe('const x = 1;\nconst y = 2;');
+      expect(result.anchors).toEqual([
+        { line: 1, hash: '749b17' },
+        { line: 2, hash: 'e6e113' },
+      ]);
+    });
+
     it('executes repo.patch to create a new file', async () => {
       const result = (await kernel.execute(
         'repo.patch',
@@ -218,6 +243,145 @@ describe('ToolKernel', () => {
       )) as { created: boolean; linesChanged: number };
       expect(result.created).toBe(true);
       expect(result.linesChanged).toBeGreaterThan(0);
+    });
+
+    it('executes repo.edit replace-line with anchor hash', async () => {
+      const result = (await kernel.execute(
+        'repo.edit',
+        {
+          path: 'src/hello.ts',
+          operations: [
+            {
+              kind: 'replace-line',
+              line: 1,
+              expectedHash: '749b17',
+              content: 'const x = 10;',
+            },
+          ],
+        },
+        'r1',
+        's1',
+      )) as { appliedOperations: number; failedOperations: unknown[] };
+
+      expect(result.appliedOperations).toBe(1);
+      expect(result.failedOperations).toHaveLength(0);
+
+      const read = (await kernel.execute(
+        'repo.read',
+        { path: 'src/hello.ts', startLine: 1, endLine: 1 },
+        'r1',
+        's1',
+      )) as { content: string };
+      expect(read.content).toBe('const x = 10;');
+    });
+
+    it('returns anchor-mismatch for stale anchored edit', async () => {
+      const result = (await kernel.execute(
+        'repo.edit',
+        {
+          path: 'src/hello.ts',
+          operations: [
+            {
+              kind: 'replace-line',
+              line: 1,
+              expectedHash: 'deadbe',
+              content: 'const x = 99;',
+            },
+          ],
+        },
+        'r1',
+        's1',
+      )) as {
+        appliedOperations: number;
+        failedOperations: Array<{ code: string }>;
+      };
+
+      expect(result.appliedOperations).toBe(0);
+      expect(result.failedOperations).toHaveLength(1);
+      expect(result.failedOperations[0]?.code).toBe('anchor-mismatch');
+    });
+
+    it('uses atomic mode by default to avoid partial writes', async () => {
+      const result = (await kernel.execute(
+        'repo.edit',
+        {
+          path: 'src/hello.ts',
+          operations: [
+            {
+              kind: 'replace-line',
+              line: 1,
+              expectedHash: '749b17',
+              content: 'const x = 11;',
+            },
+            {
+              kind: 'replace-line',
+              line: 2,
+              expectedHash: 'badbad',
+              content: 'const y = 22;',
+            },
+          ],
+        },
+        'r1',
+        's1',
+      )) as {
+        appliedOperations: number;
+        failedOperations: Array<{ code: string; anchorWindow?: unknown[] }>;
+      };
+
+      expect(result.appliedOperations).toBe(0);
+      expect(result.failedOperations).toHaveLength(1);
+      expect(result.failedOperations[0]?.code).toBe('anchor-mismatch');
+      expect(result.failedOperations[0]?.anchorWindow?.length).toBeGreaterThan(
+        0,
+      );
+
+      const read = (await kernel.execute(
+        'repo.read',
+        { path: 'src/hello.ts', startLine: 1, endLine: 1 },
+        'r1',
+        's1',
+      )) as { content: string };
+      expect(read.content).toBe('const x = 1;');
+    });
+
+    it('supports best-effort mode for partial success edits', async () => {
+      const result = (await kernel.execute(
+        'repo.edit',
+        {
+          path: 'src/hello.ts',
+          mode: 'best-effort',
+          operations: [
+            {
+              kind: 'replace-line',
+              line: 1,
+              expectedHash: '749b17',
+              content: 'const x = 11;',
+            },
+            {
+              kind: 'replace-line',
+              line: 2,
+              expectedHash: 'badbad',
+              content: 'const y = 22;',
+            },
+          ],
+        },
+        'r1',
+        's1',
+      )) as {
+        appliedOperations: number;
+        failedOperations: Array<{ code: string }>;
+      };
+
+      expect(result.appliedOperations).toBe(1);
+      expect(result.failedOperations).toHaveLength(1);
+
+      const read = (await kernel.execute(
+        'repo.read',
+        { path: 'src/hello.ts', startLine: 1, endLine: 1 },
+        'r1',
+        's1',
+      )) as { content: string };
+      expect(read.content).toBe('const x = 11;');
     });
 
     it('executes process.run', async () => {

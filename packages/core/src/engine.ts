@@ -55,6 +55,8 @@ export interface EngineChunk {
 // ---------------------------------------------------------------------------
 
 export interface EngineRunRequest {
+  /** Concrete run identifier (distinct from sessionId) */
+  runId: string;
   runConfig: RunConfig;
   /** Assembled system prompt (from ContextAssembler) */
   systemPrompt: string;

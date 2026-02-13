@@ -39,6 +39,7 @@ async function runEngineLoop(kernel: Kernel, runId: string, config: RunConfig) {
 
   try {
     const request = kernel.contextAssembler.assemble({
+      runId,
       runConfig: config,
       messages: [],
       tools,
